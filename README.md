@@ -1,4 +1,4 @@
-# Signal Capture OpeRations and Processing with PYthon (scorpy)
+# Signal Capture OpeRations and Processing with pYthon (scorpy)
 
 Scorpy is a library useful in doing signal capture file processing. In future,
 it will be documented with examples, but for now, source is it.
