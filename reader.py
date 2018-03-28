@@ -338,8 +338,9 @@ def parseIntoBinaryTracks(stream, chNames, timebase):
     # but also store the inital values for later, when we create channels
     chInitials = icomps[1:]
 
-    # use list comprehension to make a tuple of empty lists
-    chData = tuple( [ array.array('L') for _ in xrange(channelCount)] )
+    # use list comprehension to make a tuple of empty lists, attempt to get 64
+    # bits (won't work on non LP64 systems with <3.3 python)
+    chData = tuple( [ core.makeUnsignedList(64) for _ in xrange(channelCount)] )
 
     # we need to access this to final closing to the channels
     ts = None

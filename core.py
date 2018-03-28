@@ -8,10 +8,18 @@ import array
 import sys
 import math
 
-VERSION_STR = "0.1"
+VERSION_STR = "0.2"
 
-# array.array codes to use with given bitwidths/8
-arrayTypes = ('B', 'H', 'I', 'I', 'L', 'L', 'L', 'L')
+# array.array codes to use with given bitwidths/8. Assume LP64 system first
+arrayTypes = "BHIILLLL"
+if array.array('L').itemsize != 8:
+    # not LP64. since 3.3+ onwards, typecode "Q" exists for 64-bit, so switch to
+    # that if it's present. For 3.2-, out of luck really with array.array on
+    # this system, 32-bit wide integers is the max without numpy
+    if "typecodes" in dir(array) and "Q" in array.typecodes:
+        arrayTypes = arrayTypes.replace("L", "Q")
+    else:
+        print("WARNING: Numeric range restricted to 32-bits!", file=sys.stderr)
 
 if sys.version < '3':
     integerTypes = (int, long)
