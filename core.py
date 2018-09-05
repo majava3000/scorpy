@@ -201,7 +201,7 @@ class UnsignedTrack(Track):
 
     # Storage mechanism is application of value, then waiting for delta (ie,
     # same order as iterator)
-    def __init__(self, name, timebase, bitwidth, duration=None):
+    def __init__(self, name, timebase, bitwidth, duration=None, fromSegiter=None):
         Track.__init__(self, name, timebase, duration)
         self.width = bitwidth
         self.delta = makeUnsignedList(64)
@@ -211,6 +211,8 @@ class UnsignedTrack(Track):
         self.hiZValue = None
         # default to bit-vector emitting
         self.setVCDTypeToReal(False)
+        if fromSegiter != None:
+            self.setSegments(fromSegiter)
 
     # helper to split the deltas and values from a combiner set. note that combiner
     # should return (delta, value), not (delta, value1, value2, ...)
@@ -315,7 +317,7 @@ class UnsignedTrack(Track):
 #  value at start of specific delta at given index: initialValue ^ ((deltaIdx+1) % 2)
 class BinaryTrack(Track):
 
-    def __init__(self, name, timebase, initial=0, data=None, duration=None):
+    def __init__(self, name, timebase, initial=0, data=None, duration=None, fromSegiter=None):
         Track.__init__(self, name, timebase, duration)
         self.initial = initial
         self.data = data
@@ -329,6 +331,8 @@ class BinaryTrack(Track):
             #       we end with a flip just at the end, and the next section
             #       duration is zero
             self.duration = sum(self.data)+1
+        if fromSegiter != None:
+            self.setSegments(fromSegiter)
 
     def __repr__(self):
         return "<%s, i=%u, transitions=%u>" % (
