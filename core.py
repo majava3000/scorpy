@@ -8,7 +8,7 @@ import array
 import sys
 import math
 
-VERSION_STR = "0.2"
+VERSION_STR = "0.3"
 
 # array.array codes to use with given bitwidths/8. Assume LP64 system first
 arrayTypes = "BHIILLLL"
