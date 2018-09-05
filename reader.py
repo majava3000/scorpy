@@ -10,13 +10,20 @@
 # SPDX-License-Identifier: GPL-2.0
 
 from __future__ import print_function
-from scorpy.six.moves import cPickle as pickle
-from scorpy.six.moves import xrange
 import sys
 import os.path
 import re
 import struct
 import array
+
+# we use xrange internally here, and xPickle. No need to use depend on six.py
+# for these.
+if sys.version_info[0] >= 3:
+  import pickle
+  xrange = range
+else:
+  # python < 3
+  import cPickle as pickle
 
 from scorpy import core
 

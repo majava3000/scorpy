@@ -5,9 +5,8 @@ it will be documented with examples, but for now, source is it.
 
 # LICENSE
 
-Scorpy is distributed under the GPLv2 license, except for the bundled "six"
-helper library whose license is contained in the source file preamble and the
-median calculation helper in statistics.py whose license is unknown (see source)
+Scorpy is distributed under the GPLv2 license, except for the median calculation
+helper in statistics.py whose license is unknown (see source)
 
 # Scorpy library source code
 
@@ -19,10 +18,9 @@ Contains the core classes and generators
 
 Contains support code to read capture data from various file formats
 
-## six
+## report
 
-In-line copy of six, should be probably removed anyways since not that useful
-anymore.
+Contains reuseable higher level report functions (one ore more)
 
 ## statistics
 
