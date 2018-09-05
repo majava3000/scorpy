@@ -614,14 +614,24 @@ def replacer(segiter, filterFunc, replaceFunc):
 # True/False replacement may also be given as an optional parameter (True first,
 # False then)
 def tester(segiter, filterFunc, resultValues=(1, 0)):
-    # make a local map from the values
+    # make a local map from the values. Note that core.VALUE_PASSTHROUGH is
+    # acceptable for both
     retValues = {
         True: resultValues[0],
         False: resultValues[1],
     }
     for segment in segiter:
+        # NOTE: passes multidimensional values onwards correctly here
         result = filterFunc(*segment)
-        yield (segment[0], retValues[result])
+        v = retValues[result]
+        if v is VALUE_PASSTHROUGH:
+            # TODO: this will clip to single unit value vectors. Perhaps the
+            #       PASSTHROUGH should be also dimensional? if single
+            #       dimensional but input is multidimensional, copy whole input
+            #       otherwise allow each dimension to be passthrough'd
+            #       separately
+            v = segment[1]
+        yield (segment[0], v)
 
 # given segiter, combine any segments that have identical values
 def cleaner(segiter):
