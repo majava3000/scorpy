@@ -825,3 +825,85 @@ def valueRemapper(segiter, valueMap):
             r = ((segment[0],) + valueMap[k])
         # print(segment, r)
         yield r
+
+# select segments from input if there is a change in the selector iterator that
+# occurs within the input segment duration. more than single selection event per
+# segment is ignored (at-most-once). If there are no changes during the input
+# segment, it will be unselected (see below)
+#
+# each input segment is evaluated independently and will either be selected or
+# unselected. both selected and unselected may return either the original value
+# of input, or be replaced by specific values. selection/unselection logic can
+# also be inverted
+#
+# default parameters are chosen so that output is compatible for binaryTrack
+# consumption for easy consumption
+def segmentPicker(inputSegiter, changeSegiter, valueWhenSelected=1, valueWhenUnselected=0, invertSelection=False):
+
+    # since we use the iterator interface for changes selectively, we need to
+    # make a local iter wrapper for it (incase tracks are given as parameters)
+    # having iter(iter(a)) is not a problem (although might be slightly
+    # wasteful)
+    changeSegiter = iter(changeSegiter)
+
+    # always positive after processing a single segment, but may turn negative
+    # while processing the segment
+    durationUntilChange = changeSegiter.next()[0]
+
+    # # debugging only
+    # debugTimebase = 250000000
+    # ts = 0
+
+    # we make emission decision based on the inputSegiter, not the changeSegiter
+    # origin cannot be selected, since there's no way to express change at zero
+    for segment in inputSegiter:
+
+        # default to unselected
+        isSelected = False
+
+        # the following can happen:
+        # 1. segment is shorter or as long as durationUntilChange -> not selected
+        #    (durationUntilChange post adjustment is positive or zero)
+        # 2. segment is longer than durationUntilChange -> selected
+        #    (durationUntilChange post adjustment is negative)
+        #
+        #    since multiple selections must be combined into one, we need to
+        #    review the changeSegiter forward until current segment no longer
+        #    covers it (or covers exactly)
+        #
+        #    while durationUntilChange < 0:
+        #      durationUntilChange += changeSegiter.next()[0]
+        #
+        #    So infact, we can decrement first, then do the decision based on
+        #    the result
+
+        durationUntilChange -= segment[0]
+
+        if durationUntilChange < 0:
+            isSelected = True
+            # skip any changes until we're at least at zero
+            while durationUntilChange < 0:
+                durationUntilChange += changeSegiter.next()[0]
+
+        if invertSelection:
+            isSelected = not isSelected
+
+        # default to pass unchanged value
+        v = segment[1]
+
+        if isSelected:
+            if valueWhenSelected != None:
+                v = valueWhenSelected
+        else:
+            if valueWhenUnselected != None:
+                v = valueWhenUnselected
+
+        # debugging only
+        # if isSelected:
+        #     print("%9u INPUT: %s (durationUntilChange=%d)" % (ts / (debugTimebase / 1000000), segment, durationUntilChange))
+        #     print("              -> %s (selected=%u)" % (str(emitSegment), isSelected))
+        #     print("                 dur=%u us" % (segment[0] / (debugTimebase / 1000000)) )
+        # ts += segment[0]
+
+        emitSegment = segment[0], v
+        yield(emitSegment)
