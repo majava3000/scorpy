@@ -53,7 +53,7 @@ class Track:
 
     # return track duration in seconds
     def getInSeconds(self, samples=None):
-        if samples == None:
+        if samples is None:
             samples = self.duration
         return float(samples) / self.timebase
 
@@ -73,7 +73,7 @@ class Track:
     # helper to return startAt and endAt for clipRegion if selection is valid
     def getAbsoluteClipRegion(self, startAt, endAt):
         # endAt can be None (valid)
-        if endAt == None:
+        if endAt is None:
             endAt = self.duration
         # if endAt is negative, convert to absolute-index
         # dur=100, endAt=-1 -> endAt=99
@@ -99,7 +99,7 @@ class Track:
     def crop(self, startAt=0, endAt=None):
         # convert startAt and endAt into values that are valid and don't overlap
         clipRegion = self.getAbsoluteClipRegion(startAt, endAt)
-        if clipRegion == None:
+        if clipRegion is None:
             return False
         # startAt < endAt (guaranteed), both within the duration of the track
         startAt, endAt = clipRegion
@@ -158,7 +158,7 @@ class ContinuousTrack(Track):
     def crop(self, startAt=0, endAt=None):
         # convert startAt and endAt into values that are valid and don't overlap
         clipRegion = self.getAbsoluteClipRegion(startAt, endAt)
-        if clipRegion == None:
+        if clipRegion is None:
             return False
         # startAt < endAt (guaranteed), both within the duration of the track
         # duration = 10 (len(data) == 10)
@@ -211,7 +211,7 @@ class UnsignedTrack(Track):
         self.hiZValue = None
         # default to bit-vector emitting
         self.setVCDTypeToReal(False)
-        if fromSegiter != None:
+        if fromSegiter is not None:
             self.setSegments(fromSegiter)
 
     # helper to split the deltas and values from a combiner set. note that combiner
@@ -321,17 +321,17 @@ class BinaryTrack(Track):
         Track.__init__(self, name, timebase, duration)
         self.initial = initial
         self.data = data
-        if data == None:
+        if data is None:
             # make deltalist
             self.data = makeUnsignedList(64)
-        if self.duration == None and self.data != None:
+        if self.duration is None and self.data is not None:
             # setup default duration to be the sum of deltas + 1
             # so that it covers all of the delta sequence but nothing more
             # TODO: verify that the +1 makes sense, but it should, otherwise
             #       we end with a flip just at the end, and the next section
             #       duration is zero
             self.duration = sum(self.data)+1
-        if fromSegiter != None:
+        if fromSegiter is not None:
             self.setSegments(fromSegiter)
 
     def __repr__(self):
@@ -442,7 +442,7 @@ def segmentCombiner(*itersegs):
             if timeAt == segHoldUntil[chIdx]:
                 # print("  Updated chIdx %u, match on timeAt(%u)" % (chIdx, timeAt))
                 comps = next(segIterator[chIdx], None)
-                if comps == None:
+                if comps is None:
                     # ran out of track data. value valid until the end
                     # (ie, just remove this track from update list, don't update
                     # hold time
@@ -515,7 +515,7 @@ def binaryCombiner(comb):
     chIndices = None
     for c in comb:
         delta = c[0]
-        if weights == None:
+        if weights is None:
             vCount = len(c)-1
             # load the weights with the remaining length
             weights = binaryWeights[:vCount]
@@ -570,6 +570,11 @@ def getBasicStatistics(comb):
 
     return ret
 
+# Allow using a special symbols to document pass through cases. Can be used with
+# replacer and segmentPicker
+VALUE_PASSTHROUGH = None
+NO_FILTER = None
+
 # executes filter on each segment, then:
 # - if filter returns False, passes segment unmodified
 # - if filter returns True, calls the replacerFunc with the segmentData applied
@@ -582,7 +587,7 @@ def getBasicStatistics(comb):
 # on each segment)
 # NOTE: returned segments might be unclean
 def replacer(segiter, filterFunc, replaceFunc):
-    if filterFunc is None:
+    if filterFunc is NO_FILTER:
         # function that return True irrespective of number of positional variables
         filterFunc = lambda *_: True
     for segment in segiter:
@@ -593,7 +598,7 @@ def replacer(segiter, filterFunc, replaceFunc):
         else:
             r = replaceFunc(*segment)
             # print("replacer(%s): matched, result=%s" % (str(segment), str(r)))
-            if r == None:
+            if r is VALUE_PASSTHROUGH:
                 # replacer decided to avoid modifications, pass as is
                 # print(" replacer: replacer didn't want to replace, yielding original")
                 yield segment
@@ -631,12 +636,12 @@ def cleaner(segiter):
             continue
         # values change
         # emit previously stored data
-        if prevValues != None:
+        if prevValues is not None:
             yield ((prevDeltaAccumulator,) + prevValues)
         prevValues = newValues
         prevDeltaAccumulator = newDelta
     # we are likely to have a segment still unemitted so emit now
-    if prevValues != None:
+    if prevValues is not None:
         yield ((prevDeltaAccumulator,) + prevValues)
 
 # replace input data with given value when given maskiter evalutes to boolean
@@ -853,7 +858,7 @@ def segmentPicker(inputSegiter, changeSegiter, valueWhenSelected=1, valueWhenUns
 
     # always positive after processing a single segment, but may turn negative
     # while processing the segment
-    durationUntilChange = changeSegiter.next()[0]
+    durationUntilChange = next(changeSegiter)[0]
 
     # # debugging only
     # debugTimebase = 250000000
@@ -877,7 +882,7 @@ def segmentPicker(inputSegiter, changeSegiter, valueWhenSelected=1, valueWhenUns
         #    covers it (or covers exactly)
         #
         #    while durationUntilChange < 0:
-        #      durationUntilChange += changeSegiter.next()[0]
+        #      durationUntilChange += next(changeSegiter)[0]
         #
         #    So infact, we can decrement first, then do the decision based on
         #    the result
@@ -888,7 +893,7 @@ def segmentPicker(inputSegiter, changeSegiter, valueWhenSelected=1, valueWhenUns
             isSelected = True
             # skip any changes until we're at least at zero
             while durationUntilChange < 0:
-                durationUntilChange += changeSegiter.next()[0]
+                durationUntilChange += next(changeSegiter)[0]
 
         if invertSelection:
             isSelected = not isSelected
@@ -897,10 +902,10 @@ def segmentPicker(inputSegiter, changeSegiter, valueWhenSelected=1, valueWhenUns
         v = segment[1]
 
         if isSelected:
-            if valueWhenSelected != None:
+            if valueWhenSelected is not VALUE_PASSTHROUGH:
                 v = valueWhenSelected
         else:
-            if valueWhenUnselected != None:
+            if valueWhenUnselected is not VALUE_PASSTHROUGH:
                 v = valueWhenUnselected
 
         # debugging only
