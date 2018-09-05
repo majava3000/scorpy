@@ -578,8 +578,13 @@ def getBasicStatistics(comb):
 #   otherwise replaceFunc should return an iterable with at least one segment
 #   which the same configuration as the original data. iterator may return
 #   multiple segments as well, and all will be returned to caller
+# If filterFunc is None, no filtering will be done (replaceFunc will be called
+# on each segment)
 # NOTE: returned segments might be unclean
 def replacer(segiter, filterFunc, replaceFunc):
+    if filterFunc is None:
+        # function that return True irrespective of number of positional variables
+        filterFunc = lambda *_: True
     for segment in segiter:
         if not filterFunc(*segment):
             # filter didn't match, pass as is
