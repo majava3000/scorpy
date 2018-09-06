@@ -8,7 +8,17 @@ import array
 import sys
 import math
 
-VERSION_STR = "0.3"
+# prepare for semver, although not obeyed yet
+version_info = (0, 4, 0)
+VERSION_STR = "%u.%u.%u" % version_info
+
+# helper to require at least specific version of scorpy. emits error if not
+# and terminates with error. scorpy does not use this function internally
+def requireVersion(major, minor=0, patch=0):
+    checkAgainst = major, minor, patch
+    if version_info < checkAgainst:
+        print("ERROR: At least version %u.%u.%u of Scorpy required (%u.%u.%u found). Cannot continue" % (checkAgainst+version_info) )
+        sys.exit(1)
 
 # array.array codes to use with given bitwidths/8. Assume LP64 system first
 arrayTypes = "BHIILLLL"
@@ -21,7 +31,7 @@ if array.array('L').itemsize != 8:
     else:
         print("WARNING: Numeric range restricted to 32-bits!", file=sys.stderr)
 
-if sys.version < '3':
+if sys.version_info[0] < 3:
     integerTypes = (int, long)
 else:
     integerTypes = (int,)
