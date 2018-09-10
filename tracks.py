@@ -58,7 +58,7 @@ class Track:
     # TODO: Perhaps the value should be list apply instead? then could use as
     #       many values as necessary for comparison
     def asEvents(self, value):
-        return getAsEvents(self, (value,))
+        return core.getAsEvents(self, (value,))
 
     # helper to return startAt and endAt for clipRegion if selection is valid
     def getAbsoluteClipRegion(self, startAt, endAt):
