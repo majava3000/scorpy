@@ -26,28 +26,29 @@ else:
   import cPickle as pickle
 
 from scorpy import core
+from scorpy import auxutil
 
 ####################
 # PATH SPEC SUPPORT
 ####################
 
 # valid formats that we'll recognize
-formats = ("TSP8", "TSP16", "TSP32", "TSP64")
+_formats = ("TSP8", "TSP16", "TSP32", "TSP64")
 # make an re string from all of these
-formatSelector = "|".join(formats)
+_formatSelector = "|".join(_formats)
 # timebase selector
-timebaseSelector = "[0-9]+[kmKM]?"
+_timebaseSelector = "[0-9]+[kmKM]?"
 # channel name selector
-chanSelector = "-CH[0-9]+[a-zA-Z_]+[a-zA-Z0-9_]*"
+_chanSelector = "-CH[0-9]+[a-zA-Z_]+[a-zA-Z0-9_]*"
 
 # we'll use a slightly weird way of capturing both the first level and second
 # level channel specs (first level encompasses all of them and the second to
 # last match will be the last internal match which we'll throw away)
-pathSpecSelector = "^(.*?)_SCORPY_(%s)-(%s)((%s)+)\\.(.*)$" % (formatSelector, timebaseSelector, chanSelector)
-pathSpecRE = re.compile(pathSpecSelector)
+_pathSpecSelector = "^(.*?)_SCORPY_(%s)-(%s)((%s)+)\\.(.*)$" % (_formatSelector, _timebaseSelector, _chanSelector)
+_pathSpecRE = re.compile(_pathSpecSelector)
 
 # given timebaseSpec, decode into a number
-def decodeTimebaseSpec(s):
+def _decodeTimebaseSpec(s):
     factors = {
         'K': 1000,
         'M': 1000000,
@@ -59,11 +60,11 @@ def decodeTimebaseSpec(s):
         return int(s)
 
 # isolate the important bits from the channel selector
-chanSpecRE = re.compile(r"^-CH([0-9]+)(.*)$")
+_chanSpecRE = re.compile(r"^-CH([0-9]+)(.*)$")
 
 # given channel spec, return the channel number and name
-def decodeChannelSpec(s):
-    comps = chanSpecRE.match(s).groups()
+def _decodeChannelSpec(s):
+    comps = _chanSpecRE.match(s).groups()
     assert(len(comps) == 2)
     return (int(comps[0]), comps[1])
 
@@ -73,7 +74,7 @@ def decodeChannelSpec(s):
 # - too high channel IDs
 # TODO: In theory, the TSP spec will set up another maxChannelID as well, at
 #       least for TSP8
-def chansAreValid(chans, maxChannelID=15):
+def _chansAreValid(chans, maxChannelID=15):
     chanIDs = set()
     chanNames = set()
     for id, name in chans:
@@ -95,12 +96,10 @@ def chansAreValid(chans, maxChannelID=15):
 # given path, returns a tuple of (mode, baserate|None, (chIdx, chName), (chIdx, chName), ..)
 # from the given name (using scorpy path encoded spec)
 # returns None if not detected.
-def decodePathSpec(p):
+def _decodePathSpec(p):
     # identification done on basename part only
     base = os.path.basename(p)
-    # print("base:", base)
-    # print("pathSpecSelector: '%s'" % pathSpecSelector)
-    matcho = pathSpecRE.match(base)
+    matcho = _pathSpecRE.match(base)
     if matcho == None:
         return None
     # we have something, time to decode stuff
@@ -108,11 +107,11 @@ def decodePathSpec(p):
     comps = matcho.groups()[1:]
     ret = []
     ret.append(comps[0])
-    ret.append(decodeTimebaseSpec(comps[1]))
+    ret.append(_decodeTimebaseSpec(comps[1]))
     channelSpecsStr = comps[2] # we ignore the trailing internal match anyway
-    chans = [ decodeChannelSpec(x) for x in re.findall(chanSelector, channelSpecsStr) ]
+    chans = [ _decodeChannelSpec(x) for x in re.findall(_chanSelector, channelSpecsStr) ]
     # check that the channel spec is sane
-    if not chansAreValid(chans):
+    if not _chansAreValid(chans):
         return None
     ret += sorted(chans)
     # print(channelSpecs)
@@ -128,7 +127,7 @@ def decodePathSpec(p):
 ####################
 
 # return TSV values in parsed list of (absTS, val-1-int, val-2-int, ...)
-def tsvToStream(f):
+def _tsvToStream(f):
     # we do our own binvalue to int converter. this is the fastest method with
     # map with 2.7
     vMap = {
@@ -143,7 +142,7 @@ def tsvToStream(f):
         yield (ts,) + tuple(values)
 
 # iterator that runs struct decoder on fixed size chunks from file
-def structReader(f, fmtSpec):
+def _structReader(f, fmtSpec):
     elSize = struct.calcsize(fmtSpec)
     reading = True
     while True:
@@ -164,7 +163,7 @@ def structReader(f, fmtSpec):
 # list. note that since spec may select channels where there's no activity, this
 # might return consecutive identical value sets (the changes are not compatured
 # by the selected channels in spec)
-def binaryToStream(f, spec):
+def _binaryToStream(f, spec):
 
     # make the struct format spec based on the decoding type
     typeMap = {
@@ -193,7 +192,7 @@ def binaryToStream(f, spec):
     #print("fmtSpec='%s', elSize=%u" % (fmtSpec, elSize))
     # split up the data from the file into structs decoding them one element at
     # a time
-    for ts, combinedV in structReader(f, fmtSpec):
+    for ts, combinedV in _structReader(f, fmtSpec):
         # run the combinedV against each of the isolator to get the values
         # using isolator masks is a bit problematic since we'd need to get the
         # results back into integers and best we can do is bools. so instead we
@@ -206,7 +205,7 @@ def binaryToStream(f, spec):
 # TOP-LEVEL FORMAT PARSERS
 ###########################
 
-def readTSV(path, timebase=500000000):
+def _readTSV(path, timebase=500000000):
 
     # rely on the underlying python to do the right thing wrt to newlines
     f = open(path, "r")
@@ -225,25 +224,25 @@ def readTSV(path, timebase=500000000):
         sys.exit(1)
 
     # use the generic multitrack creating helper
-    return parseIntoBinaryTracks(tsvToStream(f), chNames, timebase)
+    return _parseIntoBinaryTracks(_tsvToStream(f), chNames, timebase)
 
-def readBinary(path):
-    spec = decodePathSpec(path)
+def _readBinary(path):
+    spec = _decodePathSpec(path)
     if spec == None:
         print("ERROR: Failed to decode scorpy namespec from '%s'" % path, file=sys.stderr)
         return None
     # print("scorpy path spec: '%s'" % str(spec))
 
     f = open(path, "rb")
-    stream = binaryToStream(f, spec)
+    stream = _binaryToStream(f, spec)
     # isolate the channel names (in spec order, which is also id order)
     chNames = tuple( x[1] for x in spec[2:-1] )
 
     # use the generic multitrack generator
-    return parseIntoBinaryTracks(stream, chNames, spec[1])
+    return _parseIntoBinaryTracks(stream, chNames, spec[1])
 
 # GCCF parser does not reuse the same logic as the TSV/binary readers
-def readGCCF(path):
+def _readGCCF(path):
     f = open(path, "rb")
     p = pickle.Unpickler(f)
     # common header first (carries channel count)
@@ -308,11 +307,11 @@ def readGCCF(path):
 
 def readCapture(path):
     if path.endswith('.tsv'):
-        return readTSV(path)
+        return _readTSV(path)
     elif path.endswith('.bin'):
-        return readBinary(path)
+        return _readBinary(path)
     elif path.endswith('.gccf'):
-        return readGCCF(path)
+        return _readGCCF(path)
     return None
 
 #####################################
@@ -324,7 +323,7 @@ def readCapture(path):
 # chNames: ordered list of track names to create (reader needs to be setup to
 #  return values in this order). Used as track count that is generated in the
 #  end
-def parseIntoBinaryTracks(stream, chNames, timebase):
+def _parseIntoBinaryTracks(stream, chNames, timebase):
 
     channelCount = len(chNames)
     channelIndices = tuple(range(channelCount))
@@ -347,7 +346,7 @@ def parseIntoBinaryTracks(stream, chNames, timebase):
 
     # use list comprehension to make a tuple of empty lists, attempt to get 64
     # bits (won't work on non LP64 systems with <3.3 python)
-    chData = tuple( [ core.makeUnsignedList(64) for _ in xrange(channelCount)] )
+    chData = tuple( [ auxutil.makeUnsignedList(64) for _ in xrange(channelCount)] )
 
     # we need to access this to final closing to the channels
     ts = None

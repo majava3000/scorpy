@@ -4,8 +4,10 @@
 # SPDX-License-Identifier: GPL-2.0
 
 from __future__ import print_function
+
+import scorpy
+
 import sys
-from scorpy import core
 
 # Generic mode based score reporting utility given track (segiter is not enough)
 # modeInfo is a list of following entries:
@@ -13,7 +15,7 @@ from scorpy import core
 # Values that are present in segiter that are not listed in the modeInfo are
 # ignored. Only pretty printing supported at the moment
 def emitModeReport(track, modeInfo, outf=sys.stdout):
-    stats = core.getBasicStatistics(track)
+    stats = scorpy.core.getBasicStatistics(track)
 
     # duration in seconds so that we can scale to percentages correctly
     dur = track.getInSeconds()
