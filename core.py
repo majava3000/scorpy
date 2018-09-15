@@ -11,7 +11,7 @@ from scorpy.tracks import *
 import sys
 
 # prepare for semver, although not obeyed yet
-version_info = (0, 4, 0)
+version_info = (0, 5, 0)
 VERSION_STR = "%u.%u.%u" % version_info
 
 # construct a list of valid integer types available
