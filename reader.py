@@ -25,7 +25,7 @@ else:
   # python < 3
   import cPickle as pickle
 
-import scorpy
+from scorpy import core
 from scorpy import auxutil
 
 ####################
@@ -285,14 +285,14 @@ def _readGCCF(path):
         # print("'%s': %r .. %r [timebase=%u, count=%u]" % (desc['name'], d[0], d[-1], desc['timebase'], len(d)))
         if formatCode == 'B':
             # start with an empty track (defaults used: no data, no initial)
-            bt = scorpy.core.BinaryTrack(desc['name'],
+            bt = core.BinaryTrack(desc['name'],
                                   desc['timebase'])
             # set data using a helper iterator (duration will be updated automatically)
-            bt.setSegments(scorpy.core.segiterFromIterable(d))
+            bt.setSegments(core.segiterFromIterable(d))
             # print(bt)
             track[desc['name']] = bt
         elif formatCode == 'f':
-            ft = scorpy.core.FloatTrack(desc['name'],
+            ft = core.FloatTrack(desc['name'],
                                  desc['timebase'],
                                  d)
             track[desc['name']] = ft
@@ -370,7 +370,7 @@ def _parseIntoBinaryTracks(stream, chNames, timebase):
     track = {}
     for chIdx in channelIndices:
         trackName = chNames[chIdx]
-        bt = scorpy.core.BinaryTrack(trackName,      # name
+        bt = core.BinaryTrack(trackName,      # name
                          timebase,            # timebase
                          chInitials[chIdx],   # initial
                          chData[chIdx],       # data
