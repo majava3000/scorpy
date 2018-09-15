@@ -9,5 +9,6 @@ script:
 install:
   - pip install python-coveralls
   - pip install coverage
+  - pip install pytest-cov
 after_success:
   - coveralls
