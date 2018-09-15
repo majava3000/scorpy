@@ -17,6 +17,11 @@ this point.
 
 # Scorpy library source code
 
+## auxutil
+
+Utils used by other components but without other dependencies (to break
+dependency cycles)
+
 ## core
 
 Contains the core utilities and generators. Imports `tracks.*` automatically
