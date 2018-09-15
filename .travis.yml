@@ -8,3 +8,4 @@ script:
   - pytest --cov=scorpy
 after_success:
   - coveralls
+cache: pip
