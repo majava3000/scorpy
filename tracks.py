@@ -8,6 +8,7 @@
 from __future__ import print_function
 
 import scorpy
+import scorpy.auxutil as auxutil
 
 import math
 
@@ -184,8 +185,8 @@ class UnsignedTrack(Track):
     def __init__(self, name, timebase, bitwidth, duration=None, fromSegiter=None):
         Track.__init__(self, name, timebase, duration)
         self.width = bitwidth
-        self.delta = scorpy.auxutil.makeUnsignedList(64)
-        self.value = scorpy.auxutil.makeUnsignedList(bitwidth)
+        self.delta = auxutil.makeUnsignedList(64)
+        self.value = auxutil.makeUnsignedList(bitwidth)
         self.duration = None
         # this won't match on any of the values by default
         self.hiZValue = None
@@ -198,8 +199,8 @@ class UnsignedTrack(Track):
     # should return (delta, value), not (delta, value1, value2, ...)
     def setSegments(self, segiter):
         absTime = 0
-        newDelta = scorpy.auxutil.makeUnsignedList(64)
-        newValue = scorpy.auxutil.makeUnsignedList(self.width)
+        newDelta = auxutil.makeUnsignedList(64)
+        newValue = auxutil.makeUnsignedList(self.width)
         for delta, value in segiter:
             newDelta.append(delta)
             newValue.append(value)
@@ -303,7 +304,7 @@ class BinaryTrack(Track):
         self.data = data
         if data is None:
             # make deltalist
-            self.data = scorpy.auxutil.makeUnsignedList(64)
+            self.data = auxutil.makeUnsignedList(64)
         if self.duration is None and self.data is not None:
             # setup default duration to be the sum of deltas + 1
             # so that it covers all of the delta sequence but nothing more
@@ -352,7 +353,7 @@ class BinaryTrack(Track):
         self.initial = value
         absTime = 0
         # collect newly incoming data separate from current one
-        newData = scorpy.auxutil.makeUnsignedList(64)
+        newData = auxutil.makeUnsignedList(64)
         # note that we're not interested in values here at all
         for deltaNext, value in segiter:
             absTime += delta

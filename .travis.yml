@@ -1,0 +1,11 @@
+language: python
+python:
+  - "2.7"
+  - "3.5"
+  - "pypy3.5"
+  - "nightly"
+script:
+  - pytest --cov=scorpy
+after_success:
+  - coveralls
+cache: pip
