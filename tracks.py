@@ -1,25 +1,15 @@
 #
 # Track implementations for Scorpy
+# Do not place anything else in this file, only top level classes
+#
 #
 # SPDX-License-Identifier: GPL-2.0
 
 from __future__ import print_function
-import array
-import sys
+
+import scorpy
+
 import math
-
-import core
-
-# array.array codes to use with given bitwidths/8. Assume LP64 system first
-arrayTypes = "BHIILLLL"
-if array.array('L').itemsize != 8:
-    # not LP64. since 3.3+ onwards, typecode "Q" exists for 64-bit, so switch to
-    # that if it's present. For 3.2-, out of luck really with array.array on
-    # this system, 32-bit wide integers is the max without numpy
-    if "typecodes" in dir(array) and "Q" in array.typecodes:
-        arrayTypes = arrayTypes.replace("L", "Q")
-    else:
-        print("WARNING: Numeric range restricted to 32-bits!", file=sys.stderr)
 
 # abstract top-level class
 class Track:
@@ -58,7 +48,7 @@ class Track:
     # TODO: Perhaps the value should be list apply instead? then could use as
     #       many values as necessary for comparison
     def asEvents(self, value):
-        return core.getAsEvents(self, (value,))
+        return scorpy.core.getAsEvents(self, (value,))
 
     # helper to return startAt and endAt for clipRegion if selection is valid
     def getAbsoluteClipRegion(self, startAt, endAt):
@@ -194,8 +184,8 @@ class UnsignedTrack(Track):
     def __init__(self, name, timebase, bitwidth, duration=None, fromSegiter=None):
         Track.__init__(self, name, timebase, duration)
         self.width = bitwidth
-        self.delta = core.makeUnsignedList(64)
-        self.value = core.makeUnsignedList(bitwidth)
+        self.delta = scorpy.auxutil.makeUnsignedList(64)
+        self.value = scorpy.auxutil.makeUnsignedList(bitwidth)
         self.duration = None
         # this won't match on any of the values by default
         self.hiZValue = None
@@ -208,8 +198,8 @@ class UnsignedTrack(Track):
     # should return (delta, value), not (delta, value1, value2, ...)
     def setSegments(self, segiter):
         absTime = 0
-        newDelta = core.makeUnsignedList(64)
-        newValue = core.makeUnsignedList(self.width)
+        newDelta = scorpy.auxutil.makeUnsignedList(64)
+        newValue = scorpy.auxutil.makeUnsignedList(self.width)
         for delta, value in segiter:
             newDelta.append(delta)
             newValue.append(value)
@@ -313,7 +303,7 @@ class BinaryTrack(Track):
         self.data = data
         if data is None:
             # make deltalist
-            self.data = core.makeUnsignedList(64)
+            self.data = scorpy.auxutil.makeUnsignedList(64)
         if self.duration is None and self.data is not None:
             # setup default duration to be the sum of deltas + 1
             # so that it covers all of the delta sequence but nothing more
@@ -362,7 +352,7 @@ class BinaryTrack(Track):
         self.initial = value
         absTime = 0
         # collect newly incoming data separate from current one
-        newData = core.makeUnsignedList(64)
+        newData = scorpy.auxutil.makeUnsignedList(64)
         # note that we're not interested in values here at all
         for deltaNext, value in segiter:
             absTime += delta

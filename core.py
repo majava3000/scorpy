@@ -4,13 +4,11 @@
 # SPDX-License-Identifier: GPL-2.0
 
 from __future__ import print_function
-import array
-import sys
-import math
-
 # we keep the track implementations in a separate file, but API-wise they're
-# part of core
-from tracks import *
+# part of core.
+from scorpy.tracks import *
+
+import sys
 
 # prepare for semver, although not obeyed yet
 version_info = (0, 4, 0)
@@ -18,25 +16,9 @@ VERSION_STR = "%u.%u.%u" % version_info
 
 # construct a list of valid integer types available
 if sys.version_info[0] < 3:
-    integerTypes = (int, long)
+    _integerTypes = (int, long)
 else:
-    integerTypes = (int,)
-
-# array.array codes to use with given bitwidths/8. Assume LP64 system first
-arrayTypes = "BHIILLLL"
-if array.array('L').itemsize != 8:
-    # not LP64. since 3.3+ onwards, typecode "Q" exists for 64-bit, so switch to
-    # that if it's present. For 3.2-, out of luck really with array.array on
-    # this system, 32-bit wide integers is the max without numpy
-    if "typecodes" in dir(array) and "Q" in array.typecodes:
-        arrayTypes = arrayTypes.replace("L", "Q")
-    else:
-        print("WARNING: Numeric range restricted to 32-bits!", file=sys.stderr)
-
-# internal helper to construct a list that can hold N bits wide unsigned values
-def makeUnsignedList(bitwidth):
-    sizeIndex = (bitwidth-1)//8
-    return array.array(arrayTypes[sizeIndex])
+    _integerTypes = (int,)
 
 ##
 # PUBLIC API STARTS HERE
@@ -160,7 +142,7 @@ def getCombinedChanges(*tracks):
 
     return segmentCombiner(*tracks)
 
-binaryWeights = tuple([ 2**(x) for x in range(64) ])
+_binaryWeights = tuple([ 2**(x) for x in range(64) ])
 
 # given a value combiner, return a binary value
 # data will be additive with multipliers based on binary series
@@ -173,7 +155,7 @@ def binaryCombiner(comb):
         if weights is None:
             vCount = len(c)-1
             # load the weights with the remaining length
-            weights = binaryWeights[:vCount]
+            weights = _binaryWeights[:vCount]
             # reverse the weights for msb order (more natural to debug)
             weights = tuple(reversed(weights))
             #print("binaryCombiner: weights: %s" % str(weights))
@@ -446,7 +428,7 @@ def selectTimeRegion(segIter, startAt, endAt):
 # that, but it's possible)
 def scaleDuration(segiter, f):
     # handle special case of non-float
-    if isinstance(f, integerTypes):
+    if isinstance(f, _integerTypes):
         for delta, v in segiter:
             yield(delta * f, v)
         return
