@@ -39,6 +39,11 @@ Contains reuseable higher level report functions (one ore more)
 
 Median calculation support without numpy or python3
 
+## testing
+
+Shortcode transforms, wavedrom output support and other testing related
+convenience functions
+
 ## tracks
 
 Implementations of `core.*Track` classes. No need to pull this in separately.

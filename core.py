@@ -31,6 +31,7 @@ def requireVersion(major, minor=0, patch=0):
     if version_info < checkAgainst:
         print("ERROR: At least version %u.%u.%u of Scorpy required (%u.%u.%u found). Cannot continue" % (checkAgainst+version_info) )
         sys.exit(1)
+    return True
 
 # internal combiner utility. does grunt work of getCombinedChanges, but does not
 # assume inputs are itersegs
