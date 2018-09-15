@@ -3,6 +3,11 @@
 Scorpy is a library useful in doing signal capture file processing. In future,
 it will be documented with examples, but for now, source is it.
 
+# Status
+
+[![Coverage Status](https://coveralls.io/repos/github/majava3000/scorpy/badge.svg?branch=testing%2Fintroduction-of-pytest)](https://coveralls.io/github/majava3000/scorpy?branch=testing%2Fintroduction-of-pytest)
+[![Build Status](https://travis-ci.com/majava3000/scorpy.svg?branch=master)](https://travis-ci.com/majava3000/scorpy)
+
 # LICENSE
 
 Scorpy is distributed under the GPLv2 license, except for the median calculation
