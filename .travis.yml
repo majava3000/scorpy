@@ -5,4 +5,9 @@ python:
   - "pypy3.5"
   - "nightly"
 script:
-  - pytest
+  - pytest --cov=scorpy
+install:
+  - pip install python-coveralls
+  - pip install coverage
+after_success:
+  - coveralls
