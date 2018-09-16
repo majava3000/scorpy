@@ -6,12 +6,12 @@
 Welcome to scorpy's documentation!
 ==================================
 
-Contents:
+Foobar!
 
 .. toctree::
    :maxdepth: 2
 
-
+   api
 
 Indices and tables
 ==================
@@ -20,3 +20,17 @@ Indices and tables
 * :ref:`modindex`
 * :ref:`search`
 
+.. literalinclude:: ../core.py
+   :caption: core.requireVersion
+   :name: reqVersionRef
+   :language: python
+   :linenos:
+   :pyobject: requireVersion
+
+.. literalinclude:: example.py
+   :caption: core.tester
+   :language: python
+   :dedent: 4
+   :linenos:
+   :start-after: clip-start
+   :end-before: clip-end

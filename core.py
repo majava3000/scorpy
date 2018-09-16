@@ -24,9 +24,9 @@ else:
 # PUBLIC API STARTS HERE
 ##
 
-# helper to require at least specific version of scorpy. emits error if not
-# and terminates with error. scorpy does not use this function internally
+# Convenience function only, scorpy does not use internally
 def requireVersion(major, minor=0, patch=0):
+    """Abort if scorpy is older than given *major.minor.patch* (semver)."""
     checkAgainst = major, minor, patch
     if version_info < checkAgainst:
         print("ERROR: At least version %u.%u.%u of Scorpy required (%u.%u.%u found). Cannot continue" % (checkAgainst+version_info) )
