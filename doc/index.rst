@@ -3,34 +3,20 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to scorpy's documentation!
-==================================
+Scorpy documentation
+====================
 
-Foobar!
+Scorpy: **S**\ ignal **C**\ apture **O**\ pe\ **R**\ ations and **P**\ rocessing with p\ **Y**\ thon
+
+.. warning:: Documentation is woefully inadequate but will be implemented in
+   parallel to the equally woeful unit/coverage testing.
 
 .. toctree::
    :maxdepth: 2
 
+   intro
    api
-
-Indices and tables
-==================
 
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-
-.. literalinclude:: ../core.py
-   :caption: core.requireVersion
-   :name: reqVersionRef
-   :language: python
-   :linenos:
-   :pyobject: requireVersion
-
-.. literalinclude:: example.py
-   :caption: core.tester
-   :language: python
-   :dedent: 4
-   :linenos:
-   :start-after: clip-start
-   :end-before: clip-end

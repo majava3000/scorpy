@@ -32,7 +32,12 @@ sys.path.insert(0, os.path.abspath('../..'))
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.viewcode',
+    'sphinxcontrib.wavedrom',
+    'sphinx.ext.inheritance_diagram',
 ]
+
+offline_skin_js_path = "_static/wavedrom/skins/narrow.js"
+offline_wavedrom_js_path = "_static/wavedrom/wavedrom.min.js"
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

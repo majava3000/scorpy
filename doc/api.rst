@@ -31,6 +31,10 @@ tracks: Track container classes
 .. automodule:: scorpy.tracks
    :members:
 
+
+.. TODO: move this at the class level where it belongs
+.. inheritance-diagram:: BinaryTrack
+
 vcd: Value Change Dump output support
 -------------------------------------
 
