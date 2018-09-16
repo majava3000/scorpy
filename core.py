@@ -247,11 +247,20 @@ def replacer(segiter, filterFunc, replaceFunc):
                     # print(" replacer: yielding %s" % str(replacementSegment))
                     yield replacementSegment
 
-# executes filter on each segment, and returns new segments with 0 or 1 values
-# depending whether the filter matched or not (1 = match). Values to use as
-# True/False replacement may also be given as an optional parameter (True first,
-# False then)
 def tester(segiter, filterFunc, resultValues=(1, 0)):
+    """Execute `filterFunc` on each segment and return value from `resultValues` based on filter result.
+
+Input data may be passed unmodified for either ``True`` or ``False`` case by
+using ``core.VALUE_PASSTHROUGH`` as the respective `resultValues` entry (see
+example).
+
+It is likely that output will be `dirty`. To make it clean, see
+:py:func:`core.cleaner <scorpy.core.cleaner>`
+
+Examples:
+
+.. include:: ../doc_examples/tester.inc"""
+
     # make a local map from the values. Note that core.VALUE_PASSTHROUGH is
     # acceptable for both
     retValues = {
@@ -273,6 +282,8 @@ def tester(segiter, filterFunc, resultValues=(1, 0)):
 
 # given segiter, combine any segments that have identical values
 def cleaner(segiter):
+    """Combine segments with repeating identical values."""
+
     prevValues = None
     prevDeltaAccumulator = 0
     for segment in segiter:
