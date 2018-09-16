@@ -24,9 +24,9 @@ else:
 # PUBLIC API STARTS HERE
 ##
 
-# helper to require at least specific version of scorpy. emits error if not
-# and terminates with error. scorpy does not use this function internally
+# Convenience function only, scorpy does not use internally
 def requireVersion(major, minor=0, patch=0):
+    """Abort if scorpy is older than given *major.minor.patch* (semver)."""
     checkAgainst = major, minor, patch
     if version_info < checkAgainst:
         print("ERROR: At least version %u.%u.%u of Scorpy required (%u.%u.%u found). Cannot continue" % (checkAgainst+version_info) )
@@ -247,11 +247,20 @@ def replacer(segiter, filterFunc, replaceFunc):
                     # print(" replacer: yielding %s" % str(replacementSegment))
                     yield replacementSegment
 
-# executes filter on each segment, and returns new segments with 0 or 1 values
-# depending whether the filter matched or not (1 = match). Values to use as
-# True/False replacement may also be given as an optional parameter (True first,
-# False then)
 def tester(segiter, filterFunc, resultValues=(1, 0)):
+    """Execute `filterFunc` on each segment and return value from `resultValues` based on filter result.
+
+Input data may be passed unmodified for either ``True`` or ``False`` case by
+using ``core.VALUE_PASSTHROUGH`` as the respective `resultValues` entry (see
+example).
+
+It is likely that output will be `dirty`. To make it clean, see
+:py:func:`core.cleaner <scorpy.core.cleaner>`
+
+Examples:
+
+.. include:: ../doc_examples/tester.inc"""
+
     # make a local map from the values. Note that core.VALUE_PASSTHROUGH is
     # acceptable for both
     retValues = {
@@ -273,6 +282,8 @@ def tester(segiter, filterFunc, resultValues=(1, 0)):
 
 # given segiter, combine any segments that have identical values
 def cleaner(segiter):
+    """Combine segments with repeating identical values."""
+
     prevValues = None
     prevDeltaAccumulator = 0
     for segment in segiter:

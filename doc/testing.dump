@@ -1,0 +1,16 @@
+.. This contains only stuff that I was testing with before
+
+.. literalinclude:: ../core.py
+   :caption: core.requireVersion
+   :name: reqVersionRef
+   :language: python
+   :linenos:
+   :pyobject: requireVersion
+
+.. wavedrom::
+
+    { signal: [
+            { name: "clk",  wave: "P......" },
+            { name: "bus",  wave: "x.==.=x", data: ["head", "body", "tail", "data"] },
+            { name: "wire", wave: "0.1..0." }
+    ]}
