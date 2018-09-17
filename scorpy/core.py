@@ -259,7 +259,7 @@ It is likely that output will be `dirty`. To make it clean, see
 
 Examples:
 
-.. include:: ../doc_examples/tester.inc"""
+.. include:: ../doc_examples/output/tester.inc"""
 
     # make a local map from the values. Note that core.VALUE_PASSTHROUGH is
     # acceptable for both
