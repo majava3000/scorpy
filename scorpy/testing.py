@@ -84,17 +84,20 @@ def segiterToWavedrom(segiter, name):
 
   return ret
 
-def resultAsWavedrom(label, inputTrack, resultTracks):
+def resultAsWavedrom(inputTrack, resultTracks, label=None):
   ret = ['{signal: [']
   ret.append('  '+segiterToWavedrom(inputTrack, inputTrack.name))
   ret.append(r'  {},')
   for rt in resultTracks:
     ret.append('  '+segiterToWavedrom(rt, rt.name))
+  labelText = ''
+  if label is not None:
+    labelText = ", text: '%s'" % label
   ret.append("""  ],
-  head: { tick: -1, text: '%s' },
+  head: { tick: -1%s },
   config: { skin: 'narrow' },
 }
-""" % label)
+""" % labelText)
   return '\n'.join(ret)
 
 def makeSimpleTrack(label, segiter):
