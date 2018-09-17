@@ -1,4 +1,4 @@
-targets := test docinc html
+targets := test docinc html spdx
 
 all: $(targets)
 .PHONY: all
@@ -11,3 +11,7 @@ docinc:
 
 html:
 	$(MAKE) -C doc html
+
+spdx:
+	@echo "Files without SPDX identifier:"
+	@rg --files-without-match -tpy SPDX-License-Identifier
