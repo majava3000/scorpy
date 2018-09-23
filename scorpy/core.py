@@ -278,13 +278,17 @@ Yields:
     Yields segments that have their values replaced based on `filterFunc`
     decisions and `resultValue` contents.
 
+Examples:
+
+.. include:: ../doc_examples/output/tester.inc
+
 Note:
     It is likely that output will be `dirty`. To make it clean, see
     :py:func:`core.cleaner <scorpy.core.cleaner>`
 
-Examples:
-
-.. include:: ../doc_examples/output/tester.inc"""
+Note:
+    Independent of data or parameters, keeps number of segments same in flow.
+"""
 
     # make a local map from the values. Note that core.VALUE_PASSTHROUGH is
     # acceptable for both
@@ -307,7 +311,28 @@ Examples:
 
 # given segiter, combine any segments that have identical values
 def cleaner(segiter):
-    """Combine segments with repeating identical values."""
+    """Combines segments with repeating identical values.
+
+Many of the tools in `scorpy` may result in `dirty` output, were values across
+multiple segments may be the same. Most of the time, you'll want to avoid such
+`dirty` data unless "you know what you're doing". This tool combines segments
+that have repeating values.
+
+Args:
+    segiter (iterator): Segments to process. Consecutive segments that have the
+        same value will be combined into one segment.
+
+Yields:
+    Yields segments that are `clean` (the same value does not repeat across two
+    consecutive segments).
+
+Examples:
+
+.. include:: ../doc_examples/output/cleaner.inc
+
+Note:
+    Depending on input data, may reduce number of segments in flow.
+"""
 
     prevValues = None
     prevDeltaAccumulator = 0
