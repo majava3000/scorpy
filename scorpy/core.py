@@ -208,10 +208,16 @@ def getBasicStatistics(comb):
 
     return ret
 
-# Allow using a special symbols to document pass through cases. Can be used with
-# replacer and segmentPicker
+#: Indicate that segments or segment values should be passed without
+#: modifications. Please see individual fuctions/tools for documentation on
+#: what is the precise effect
 VALUE_PASSTHROUGH = None
-NO_FILTER = None
+
+#: Filter that always returns True
+FILTER_ALWAYS_TRUE = lambda *_: True
+
+#: Filter that always returns False
+FILTER_ALWAYS_FALSE = lambda *_: False
 
 # executes filter on each segment, then:
 # - if filter returns False, passes segment unmodified
@@ -221,13 +227,8 @@ NO_FILTER = None
 #   otherwise replaceFunc should return an iterable with at least one segment
 #   which the same configuration as the original data. iterator may return
 #   multiple segments as well, and all will be returned to caller
-# If filterFunc is None, no filtering will be done (replaceFunc will be called
-# on each segment)
 # NOTE: returned segments might be unclean
 def replacer(segiter, filterFunc, replaceFunc):
-    if filterFunc is NO_FILTER:
-        # function that returns True irrespective of number of positional vars
-        filterFunc = lambda *_: True
     for segment in segiter:
         if not filterFunc(*segment):
             # filter didn't match, pass as is

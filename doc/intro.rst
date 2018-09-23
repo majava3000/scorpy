@@ -25,7 +25,8 @@ Segment
   time (duration). This is opposed to the model where a signal value is stored
   for each point in time. Scorpy cannot represent duration of zero, so minimum
   segment duration will always be 1. Duration is unitless, and a `timescale`
-  is used to convert into (or from) physical time representation.
+  is used to convert into (or from) physical time representation. `None` cannot
+  be used as a value for a segment.
 Segiter
   Short hand for Segment iterator, which is the internal implementation model
   for most of the useful processing functions in scorpy. Most functions are
