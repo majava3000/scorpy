@@ -4,7 +4,7 @@ Scorpy is a library useful in doing signal capture file processing.
 
 # Status
 
-[![Coverage Status](https://coveralls.io/repos/github/majava3000/scorpy/badge.svg?branch=testing%2Fintroduction-of-pytest)](https://coveralls.io/github/majava3000/scorpy?branch=testing%2Fintroduction-of-pytest)
+[![Coverage Status](https://coveralls.io/repos/github/majava3000/scorpy/badge.svg?branch=master)](https://coveralls.io/github/majava3000/scorpy?branch=master)
 [![Build Status](https://travis-ci.com/majava3000/scorpy.svg?branch=master)](https://travis-ci.com/majava3000/scorpy)
 [![Documentation Status](https://readthedocs.org/projects/scorpy/badge/?version=latest)](https://scorpy.readthedocs.io/en/latest/?badge=latest)
 
