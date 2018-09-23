@@ -32,6 +32,12 @@ class Track:
     def __iter__(self):
         return self.getSegments()
 
+    def getSegments(self):
+        raise NotImplementedError('subclasses must override getSegments()!')
+
+    def setSegments(self, segiter):
+        raise NotImplementedError('subclasses must override setSegments()!')
+
     # return track duration in seconds
     def getInSeconds(self, samples=None):
         if samples is None:
@@ -88,7 +94,7 @@ class Track:
         # we want a mechanism where we select data from segiter when signal is
         # "high". note that temporal clipping will have to be done as well, so
         # it's not enough to do regular selection
-        self.setSegments(selectTimeRegion(self.getSegments(), startAt, endAt))
+        self.setSegments(scorpy.core.selectTimeRegion(self.getSegments(), startAt, endAt))
 
         return True
 
@@ -105,7 +111,7 @@ class Track:
             # attempt integer conversion if possible
             f = int(f)
 
-        self.setSegments(scaleDuration(self.getSegments(), f))
+        self.setSegments(scorpy.core.scaleDuration(self.getSegments(), f))
         self.timebase = newTimebase
 
 #
@@ -118,7 +124,8 @@ class ContinuousTrack(Track):
         Track.__init__(self, name, timebase, len(sequence))
         self.data = sequence
 
-    # no setSegments
+    def setSegments(self, segiter):
+        raise NotImplementedError('ContinuousTrack does not support .setSegments()!')
 
     def __repr__(self):
         return "<%s>" % (self.baseDescriptor("ContinuousTrack"))
@@ -130,7 +137,7 @@ class ContinuousTrack(Track):
     def getSegments(self):
         # deals with the case when the values repeat, otherwise VCD output might
         # emit dummy timestamps
-        return cleaner(self.getSegmentsRaw())
+        return scorpy.core.cleaner(self.getSegmentsRaw())
 
     # in-place cropping of track.
     # TODO: evaluate whether the inplace-operation is correct. perhaps would be

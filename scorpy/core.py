@@ -208,10 +208,16 @@ def getBasicStatistics(comb):
 
     return ret
 
-# Allow using a special symbols to document pass through cases. Can be used with
-# replacer and segmentPicker
+#: Indicate that segments or segment values should be passed without
+#: modifications. Please see individual fuctions/tools for documentation on
+#: what is the precise effect
 VALUE_PASSTHROUGH = None
-NO_FILTER = None
+
+#: Filter that always returns True
+FILTER_ALWAYS_TRUE = lambda *_: True
+
+#: Filter that always returns False
+FILTER_ALWAYS_FALSE = lambda *_: False
 
 # executes filter on each segment, then:
 # - if filter returns False, passes segment unmodified
@@ -221,13 +227,8 @@ NO_FILTER = None
 #   otherwise replaceFunc should return an iterable with at least one segment
 #   which the same configuration as the original data. iterator may return
 #   multiple segments as well, and all will be returned to caller
-# If filterFunc is None, no filtering will be done (replaceFunc will be called
-# on each segment)
 # NOTE: returned segments might be unclean
 def replacer(segiter, filterFunc, replaceFunc):
-    if filterFunc is NO_FILTER:
-        # function that returns True irrespective of number of positional vars
-        filterFunc = lambda *_: True
     for segment in segiter:
         if not filterFunc(*segment):
             # filter didn't match, pass as is
@@ -248,18 +249,46 @@ def replacer(segiter, filterFunc, replaceFunc):
                     yield replacementSegment
 
 def tester(segiter, filterFunc, resultValues=(1, 0)):
-    """Execute `filterFunc` on each segment and return value from `resultValues` based on filter result.
+    """Executes `filterFunc` on each segment and replace the segment value from `resultValues` based on filter result.
 
-Input data may be passed unmodified for either ``True`` or ``False`` case by
-using ``core.VALUE_PASSTHROUGH`` as the respective `resultValues` entry (see
-example).
+Each segment in `segiter` is passed to `filterFunc` (with the segment data as
+the parameters of the call`). Based on `filterFunc` return value (`True` or
+`False`), `resultValues` is consulted as follows:
 
-It is likely that output will be `dirty`. To make it clean, see
-:py:func:`core.cleaner <scorpy.core.cleaner>`
+Result of filter:
+
+* `True`: use `resultValues[0]`
+* `False`: use `resultValues[1]`
+
+``core.VALUE_PASSTHROUGH`` can be used in place of any value in `resultValues`
+indicating that the segment value should be passed "as is" without replacement.
+
+Args:
+    segiter (iterator): Segments to process. Each segment will be evaluated
+        separately.
+    filterFunc (callable): Function that is called once for each segment with
+        the segment given as the parameter to the function. Must return True or
+        False.
+    resultValues (optional, binary-mapping): Anything that can be indexed with
+        ``0`` or ``1`` returning the values that will replace the values of the
+        original segment based on filter result. Default values result in a
+        simple binary output based on filter.
+
+Yields:
+    Yields segments that have their values replaced based on `filterFunc`
+    decisions and `resultValue` contents.
 
 Examples:
 
-.. include:: ../doc_examples/output/tester.inc"""
+.. include:: ../doc_examples/output/tester.inc
+
+Note:
+    It is likely that output will be `dirty`. To make it clean, see
+    :py:func:`core.cleaner <scorpy.core.cleaner>`
+
+Note:
+    Independent of data or parameters, keeps number of segments same in flow.
+"""
 
     # make a local map from the values. Note that core.VALUE_PASSTHROUGH is
     # acceptable for both
@@ -282,7 +311,28 @@ Examples:
 
 # given segiter, combine any segments that have identical values
 def cleaner(segiter):
-    """Combine segments with repeating identical values."""
+    """Combines segments with repeating identical values.
+
+Many of the tools in `scorpy` may result in `dirty` output, were values across
+multiple segments may be the same. Most of the time, you'll want to avoid such
+`dirty` data unless "you know what you're doing". This tool combines segments
+that have repeating values.
+
+Args:
+    segiter (iterator): Segments to process. Consecutive segments that have the
+        same value will be combined into one segment.
+
+Yields:
+    Yields segments that are `clean` (the same value does not repeat across two
+    consecutive segments).
+
+Examples:
+
+.. include:: ../doc_examples/output/cleaner.inc
+
+Note:
+    Depending on input data, may reduce number of segments in flow.
+"""
 
     prevValues = None
     prevDeltaAccumulator = 0
