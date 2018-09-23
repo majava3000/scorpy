@@ -32,6 +32,7 @@ sys.path.insert(0, os.path.abspath('..'))
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.viewcode',
+    'sphinx.ext.napoleon',
     'sphinxcontrib.wavedrom',
     'sphinx.ext.inheritance_diagram',
 ]

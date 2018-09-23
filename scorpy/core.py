@@ -248,14 +248,38 @@ def replacer(segiter, filterFunc, replaceFunc):
                     yield replacementSegment
 
 def tester(segiter, filterFunc, resultValues=(1, 0)):
-    """Execute `filterFunc` on each segment and return value from `resultValues` based on filter result.
+    """Executes `filterFunc` on each segment and replace the segment value from `resultValues` based on filter result.
 
-Input data may be passed unmodified for either ``True`` or ``False`` case by
-using ``core.VALUE_PASSTHROUGH`` as the respective `resultValues` entry (see
-example).
+Each segment in `segiter` is passed to `filterFunc` (with the segment data as
+the parameters of the call`). Based on `filterFunc` return value (`True` or
+`False`), `resultValues` is consulted as follows:
 
-It is likely that output will be `dirty`. To make it clean, see
-:py:func:`core.cleaner <scorpy.core.cleaner>`
+Result of filter:
+
+* `True`: use `resultValues[0]`
+* `False`: use `resultValues[1]`
+
+``core.VALUE_PASSTHROUGH`` can be used in place of any value in `resultValues`
+indicating that the segment value should be passed "as is" without replacement.
+
+Args:
+    segiter (iterator): Segments to process. Each segment will be evaluated
+        separately.
+    filterFunc (callable): Function that is called once for each segment with
+        the segment given as the parameter to the function. Must return True or
+        False.
+    resultValues (optional, binary-mapping): Anything that can be indexed with
+        ``0`` or ``1`` returning the values that will replace the values of the
+        original segment based on filter result. Default values result in a
+        simple binary output based on filter.
+
+Yields:
+    Yields segments that have their values replaced based on `filterFunc`
+    decisions and `resultValue` contents.
+
+Note:
+    It is likely that output will be `dirty`. To make it clean, see
+    :py:func:`core.cleaner <scorpy.core.cleaner>`
 
 Examples:
 
