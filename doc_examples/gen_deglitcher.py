@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# tester example generator/code
+# deglitcher example generator/code
 #
 # SPDX-License-Identifier: GPL-2.0
 
@@ -8,25 +8,19 @@ from __future__ import print_function
 from common import *
 
 if __name__ == '__main__':
-    name = 'tester'
+    name = 'deglitcher'
     args = getArgs(name)
 
-    input_ = makeSimpleTrack('input', shortcodeToSegiter("ABCA.B.C.A..B..C.."))
-
-    # this allows us to use symbols as is, without messing stuff us. only useful
-    # for examples though
-    B = 66
-    Y = 89
-    n = 110
+    input_ = makeSimpleTrack('input', shortcodeToSegiter("ABC.D.E..F..G...H..I..."))
 
     # these two anchors are used by the include to actually get the python
     # specific bit of the output. make sure that only one indent level is here
     # (tab=4)
     # example-start-here
-    r1 = core.tester(input_, lambda dur, v: (v == B and dur == 2))
-    r2 = core.tester(input_, lambda dur, v: (v == B and dur == 2), (Y, n))
-    r3 = core.tester(input_, lambda dur, v: (dur == 2), (core.VALUE_PASSTHROUGH, n))
-    r4 = core.tester(input_, lambda dur, v: (dur == 2), (Y, core.VALUE_PASSTHROUGH))
+    r1 = core.deglitcher(input_)
+    r2 = core.deglitcher(input_, 2)
+    r3 = core.deglitcher(input_, 3)
+    r4 = core.deglitcher(input_, 4)
     # example-end-here
 
     r1 = makeSimpleTrack('result1', r1)

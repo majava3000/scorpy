@@ -8,7 +8,8 @@ from __future__ import print_function
 from common import *
 
 if __name__ == '__main__':
-    args = getArgs('cleaner')
+    name = 'cleaner'
+    args = getArgs(name)
 
     input_ = makeSimpleTrack('input', shortcodeToSegiter("00110.1.0.01.111100000101"))
 
@@ -18,4 +19,4 @@ if __name__ == '__main__':
 
     r = makeSimpleTrack('result', r)
 
-    doIt(args, input_, [r], 'cleaner')
+    doIt(args, input_, [r], name)
