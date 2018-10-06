@@ -743,13 +743,77 @@ def segmentPicker(inputSegiter, changeSegiter, valueWhenSelected=1, valueWhenUns
 # if segment duration is shorter than pre+post, there anchor mode will not be
 # present in output (and the segment length is divided linearly between pre and
 # post)
-def addSyntheticTransitions(segiter, modeAnchor, modePre, modePost, durationPre, durationPost):
+def transitionGenerator(segiter, valueAnchor, valuePre, valuePost, durationPre, durationPost):
+    """Split segments with `valueAnchor` into three, according to pre and post durations.
+
+All segments that have `valueAnchor` as value and duration of 2 or longer, will
+be split into two or three segments:
+
+1. First segment ("pre segment") will have value `valuePre` and duration of 1 to
+   `durationPre`
+2. Middle segment (if present) will have value `valueAnchor` and duration of
+   original segment minus `durationPre` + `durationPost`
+3. Third segment ("post segment") will have value `valuePost` and duration of 1
+   to `durationPost`
+
+Whether middle segment will be emitted depends on whether there is any duration
+left over after the two other durations are subtracted from it.
+
+Durations of the "pre" and "post" segments are normally `durationPre` and
+`durationPost` expect in the case when the original segment is shorter than
+these two durations combined. In that case, duration of the original segment
+will be divided to "pre" and "post" segments according to their respective
+durations to each other (please see example waveform).
+
+This tool is useful in cases where segments are used to store "system state"
+(like current power mode of an MCU) and where some states are always present,
+even if they cannot be "exported" into the real world via signals (powering up
+and MCU or shutting it down). With this tool, such modes can be synthesized and
+accounted for, assuming their durations are fixed or relatively stable across
+occurances.
+
+Args:
+    segiter (iterator): Segments to process. Any segments with value _other_
+        than `valueAnchor` will be passed as-is.
+    valuePre (segvalue): Value to use for created pre-segments.
+    valuePost (segvalue): Value to use for created post-segments.
+    durationPre (integer, >0): Maximum duration of each pre-segment.
+    durationPost (integer, >0): Maximum duration of each post-segment.
+
+Yields:
+    Yields segments that include the new two segments representing implicit
+        states / mode transitions.
+
+Examples:
+
+.. include:: ../doc_examples/output/transitiongenerator.inc
+
+Note:
+    Likely to increase number of segments in flow but keeps total duration the
+    same. Worst case expansion in number of segments is n*3. Will have dirty
+    output only with dirty input or abnormal selection of pre and post segment
+    values.
+
+Note:
+    In case of segment of odd duration and which is not long enough to contain
+    combined duration of pre and post segments, and both segments having equal
+    durations, there is an intentional slight skew towards the post-segment
+    winning in duration. (please see `result3` waveform above).
+
+Warning:
+    Synthesized segments will be placed at start and end of flow if the start
+    and/or end will satisfy the anchoring criteria. This might skew analysis
+    if initial and post-ending states are different from expected, for example
+    in MCU power state analysis.
+"""
+
     # if anchor is too short to contain both full times, only pre+post will be
     # generated and the segment time is split between them according to the
     # relative length of each.
-    preDurationFactor = durationPre / (durationPre + durationPost)
+    preDurationFactor = float(durationPre) / (durationPre + durationPost)
     # duration cutoff under which there won't be anchor since it can't fit
     anchorCutoffDuration = durationPre + durationPost
+    # print("preDurationFactor=%s, anchorCutoffDuration=%u" % (str(preDurationFactor), anchorCutoffDuration))
 
     # replacer function will be called upon hitting anchor
     # we reuse the anchorValue since it's given to us anyway
@@ -759,18 +823,21 @@ def addSyntheticTransitions(segiter, modeAnchor, modePre, modePost, durationPre,
         if segmentDuration <= anchorCutoffDuration:
             # only two segments. split the time according to relative times
             # taken by pre and post (assume the actions are linear in terms of
-            # moving into anchor mode and out of it)
-            postSegDuration = int(0.5 + preDurationFactor * segmentDuration)
-            preSegDuration = segmentDuration - postSegDuration
+            # moving into anchor mode and out of it). The "just under half" is
+            # done to make sure that in equal division cases but off number of
+            # duration, the post will always win
+            preSegDuration = int(0.4999 + preDurationFactor * segmentDuration)
+            postSegDuration = segmentDuration - preSegDuration
+            # print("preDur=%u postDur=%u" % (preSegDuration, postSegDuration))
             assert(postSegDuration >= 0 and preSegDuration >= 0)
-            r = ( (preSegDuration, modePre),
-                  (postSegDuration, modePost) )
+            r = ( (preSegDuration, valuePre),
+                  (postSegDuration, valuePost) )
         else:
             # we generate all three segments
             anchorSegDuration = segmentDuration - (durationPre + durationPost)
-            r =  ( (durationPre, modePre),
+            r =  ( (durationPre, valuePre),
                    (anchorSegDuration, anchorValue),
-                   (durationPost, modePost) )
+                   (durationPost, valuePost) )
         # print("addSynthModes(ind=%u): r=%s" % (segmentDuration, str(r)) )
         return r
 
@@ -778,6 +845,6 @@ def addSyntheticTransitions(segiter, modeAnchor, modePre, modePost, durationPre,
     #  duration used to ensure that at least 2 time units are present,
     #  otherwise pre+post cannot be represented (minimum represetation without
     #  anchor)
-    anchorFilter = lambda dur, v: (dur >= 2 and v == modeAnchor)
+    anchorFilter = lambda dur, v: (dur >= 2 and v == valueAnchor)
     # return the iterator to caller
     return replacer(segiter, anchorFilter, addSynthModes)

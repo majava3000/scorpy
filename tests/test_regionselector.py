@@ -15,14 +15,6 @@ import pytest
 def input_():
   return testing.makeSimpleTrack('input', testing.shortcodeToSegiter("ABCD.E.F.G..H..I.."))
 
-#   input: ABCD.E.F.G..H..I..
-# result1: A
-# result2: DE
-# result3: G
-# result4: ABCD.E.F.G..H..I..
-# result4: I
-
-
 def test_regionselector_example1(input_):
   #  input: ABCD.E.F.G..H..I..
   # result: A
