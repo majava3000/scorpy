@@ -166,16 +166,47 @@ def binaryCombiner(comb):
         # print("(%u, %s) -> (%u, %s)" % (delta, c[1:1+vCount], delta, v))
         yield (delta, v)
 
-# deglitch a combiner stream
-# any delta that is equal or smaller to given value will be combined
-# with the following entry
-def deglitcher(comb, samplesToDeglitch=1):
-    # amount of accumulated change for next entry if glitch detected
+def deglitcher(segiter, threshold=1):
+    """Merges duration of segments of equal or shorter duration than `threshold` to the next segment whose duration is above `threshold`.
+
+Useful when deglitching transitions, especially on multidimensional segments
+that represent multiple binary tracks of parallel capture. Can be used to get
+rid of erronous/invalid semantic "values" as well, if it's known that specific
+semantic values have minimum duration under which they cannot exist.
+
+"Trailing" segments that are equal or under `treshold` in duration will be
+emitted "as is". Total duration of output segments will always match total
+input segments' duration.
+
+Args:
+    segiter (iterator): Segments to process. Each segment will be evaluated
+        separately.
+    threshold (optional, integer, >=0): any segment whose duration is equal or
+        shorter than `threshold` will be eliminated and the duration of that
+        segment transferred to the next segment.
+
+Yields:
+    Yields segments that have "short" segments removed while conserving overall
+    duration of input.
+
+Examples:
+
+.. include:: ../doc_examples/output/deglitcher.inc
+
+Note:
+    It is possible that output will be `dirty`. To make it clean, see
+    :py:func:`core.cleaner <scorpy.core.cleaner>`
+
+Note:
+    Depending on input data, may reduce number of segments in flow.
+"""
+
+    # accumulated duration for segments that have been "removed"
     accu = 0
-    # track glitched entry, so that we can remove the last one
+    # last removed "short" segment (so that we can emit the trailing segment)
     prevGlitch = None
-    for c in comb:
-        if c[0] <= samplesToDeglitch:
+    for c in segiter:
+        if c[0] <= threshold:
             accu += c[0]
             prevGlitch = c
         else:
@@ -187,10 +218,13 @@ def deglitcher(comb, samplesToDeglitch=1):
             else:
                 # emit unchanged
                 yield(c)
-    # we might have a glitch at the very end. if so, don't deglitch it
-    # TODO: this is untested, need testdata for this
+    # we end with trailing short segments, so we need to emit one last segment
+    # that will cover the remaining time, with the values from the last segment.
+    # we'll also hit this if all input segments are short, and in that case
+    # we'll only ever emit one segment that will cover whole of the inputs'
+    # duration
     if accu > 0:
-        yield(prevGlitch)
+        yield(tuple( (accu,) + prevGlitch[1:]))
 
 # returns basic statistic data from the track:
 # - number of each value is present
