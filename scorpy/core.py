@@ -490,12 +490,47 @@ def segiterFromIterable(iterable, timeScaler=1):
             #count = 1
     yield(timeScaler * count, prevV)
 
-# returns segiter that picks data from input segiter given time region given
-# (does not return anything before or after the selection points, so duration of
-# returned segiter is likely to be shorter than the input
-def selectTimeRegion(segIter, startAt, endAt):
+def regionSelector(segiter, startAt, endAt):
+    """Get segments between `startAt` and `endAt` (non-inclusive).
+
+Returns segments between the two points, possibly "clipping" segments in the
+process.
+
+Mainly useful for "cropping" data to be processed based on an auxiliary signal
+or timing information.
+
+Args:
+    segiter (iterator): Segments to process. Both `startAt` and `endAt` are
+        relative to the start of first segment.
+    startAt (integer, >= 0): Point at which selection starts.
+    endAt (integer, >= 0): Point before the selection ends. May be past end of
+        segments (no extra segments will be generated due to this).
+
+Yields:
+    Yields segments that are between `startAt` and `endAt`, clipping the
+    first and last segments as required.
+
+Examples:
+
+.. include:: ../doc_examples/output/regionselector.inc
+
+Note:
+    Depending on `startAt` and `endAt`, may reduce number of segments in flow.
+
+Warning:
+    Total duration of output is determined by the length of the region selected
+    and available input segments. May return an empty segiter if selected region
+    is outside the input duration or region selection is malformed.
+"""
+
     absTime = 0
-    for segment in segIter:
+    # there's an internal snafu that will break on:
+    #  ABCD.E.F.G..H..I.. (10,10) [should yield empty, but yields "G"]
+    # So, short-circuit call with empty result if region size is abnormal
+    if startAt >= endAt:
+        return
+
+    for segment in segiter:
         # the following cases exist:
         # 1) segment is completely before startAt -> omitted
         #    segEnd <= startAt

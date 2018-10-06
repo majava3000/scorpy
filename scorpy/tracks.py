@@ -94,7 +94,7 @@ class Track:
         # we want a mechanism where we select data from segiter when signal is
         # "high". note that temporal clipping will have to be done as well, so
         # it's not enough to do regular selection
-        self.setSegments(scorpy.core.selectTimeRegion(self.getSegments(), startAt, endAt))
+        self.setSegments(scorpy.core.regionSelector(self.getSegments(), startAt, endAt))
 
         return True
 
