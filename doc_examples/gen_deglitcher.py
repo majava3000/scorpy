@@ -8,7 +8,8 @@ from __future__ import print_function
 from common import *
 
 if __name__ == '__main__':
-    args = getArgs('tester')
+    name = 'deglitcher'
+    args = getArgs(name)
 
     input_ = makeSimpleTrack('input', shortcodeToSegiter("ABC.D.E..F..G...H..I..."))
 
@@ -29,4 +30,4 @@ if __name__ == '__main__':
 
     # do magic. supports shortcode, wavedrom and docint modes. the label is used
     # only for wavedrom output mode. tuple is necessary for the results
-    doIt(args, input_, [r1, r2, r3, r4], 'deglitcher')
+    doIt(args, input_, [r1, r2, r3, r4], name)
