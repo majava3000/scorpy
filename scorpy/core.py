@@ -789,7 +789,10 @@ Examples:
 .. include:: ../doc_examples/output/transitiongenerator.inc
 
 Note:
-    May increase number of segments in flow but keeps total duration the same.
+    Likely to increase number of segments in flow but keeps total duration the
+    same. Worst case expansion in number of segments is n*3. Will have dirty
+    output only with dirty input or abnormal selection of pre and post segment
+    values.
 
 Note:
     In case of segment of odd duration and which is not long enough to contain
