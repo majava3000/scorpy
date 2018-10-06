@@ -60,3 +60,10 @@ def test_regionselector_allzero_short():
   input_ = testing.makeSimpleTrack('input', testing.shortcodeToSegiter("0"))
   r = core.transitionGenerator(input_, 0, d, u, 1, 1)
   assert testing.segiterToShortcode(r) == "0"
+
+# This won't work. Issue 26 created for this.
+# def test_regionselector_only_pre(input_):
+#   #  input: 0.R0R0.R0..R0...R0....
+#   # result: 0
+#   r = core.transitionGenerator(input_, 0, d, u, 1, 0)
+#   assert testing.segiterToShortcode(r) == "d0RdRd0Rd0.Rd0..Rd0..."
