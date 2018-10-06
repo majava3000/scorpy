@@ -743,13 +743,14 @@ def segmentPicker(inputSegiter, changeSegiter, valueWhenSelected=1, valueWhenUns
 # if segment duration is shorter than pre+post, there anchor mode will not be
 # present in output (and the segment length is divided linearly between pre and
 # post)
-def addSyntheticTransitions(segiter, modeAnchor, modePre, modePost, durationPre, durationPost):
+def transitionGenerator(segiter, valueAnchor, valuePre, valuePost, durationPre, durationPost):
     # if anchor is too short to contain both full times, only pre+post will be
     # generated and the segment time is split between them according to the
     # relative length of each.
-    preDurationFactor = durationPre / (durationPre + durationPost)
+    preDurationFactor = float(durationPre) / (durationPre + durationPost)
     # duration cutoff under which there won't be anchor since it can't fit
     anchorCutoffDuration = durationPre + durationPost
+    # print("preDurationFactor=%s, anchorCutoffDuration=%u" % (str(preDurationFactor), anchorCutoffDuration))
 
     # replacer function will be called upon hitting anchor
     # we reuse the anchorValue since it's given to us anyway
@@ -759,18 +760,21 @@ def addSyntheticTransitions(segiter, modeAnchor, modePre, modePost, durationPre,
         if segmentDuration <= anchorCutoffDuration:
             # only two segments. split the time according to relative times
             # taken by pre and post (assume the actions are linear in terms of
-            # moving into anchor mode and out of it)
-            postSegDuration = int(0.5 + preDurationFactor * segmentDuration)
-            preSegDuration = segmentDuration - postSegDuration
+            # moving into anchor mode and out of it). The "just under half" is
+            # done to make sure that in equal division cases but off number of
+            # duration, the post will always win
+            preSegDuration = int(0.4999 + preDurationFactor * segmentDuration)
+            postSegDuration = segmentDuration - preSegDuration
+            # print("preDur=%u postDur=%u" % (preSegDuration, postSegDuration))
             assert(postSegDuration >= 0 and preSegDuration >= 0)
-            r = ( (preSegDuration, modePre),
-                  (postSegDuration, modePost) )
+            r = ( (preSegDuration, valuePre),
+                  (postSegDuration, valuePost) )
         else:
             # we generate all three segments
             anchorSegDuration = segmentDuration - (durationPre + durationPost)
-            r =  ( (durationPre, modePre),
+            r =  ( (durationPre, valuePre),
                    (anchorSegDuration, anchorValue),
-                   (durationPost, modePost) )
+                   (durationPost, valuePost) )
         # print("addSynthModes(ind=%u): r=%s" % (segmentDuration, str(r)) )
         return r
 
@@ -778,6 +782,6 @@ def addSyntheticTransitions(segiter, modeAnchor, modePre, modePost, durationPre,
     #  duration used to ensure that at least 2 time units are present,
     #  otherwise pre+post cannot be represented (minimum represetation without
     #  anchor)
-    anchorFilter = lambda dur, v: (dur >= 2 and v == modeAnchor)
+    anchorFilter = lambda dur, v: (dur >= 2 and v == valueAnchor)
     # return the iterator to caller
     return replacer(segiter, anchorFilter, addSynthModes)
