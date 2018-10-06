@@ -253,40 +253,79 @@ FILTER_ALWAYS_TRUE = lambda *_: True
 #: Filter that always returns False
 FILTER_ALWAYS_FALSE = lambda *_: False
 
-# executes filter on each segment, then:
-# - if filter returns False, passes segment unmodified
-# - if filter returns True, calls the replacerFunc with the segmentData applied
-#   if replacerFunc returns None:
-#   - return original segment unmodified
-#   otherwise replaceFunc should return an iterable with at least one segment
-#   which the same configuration as the original data. iterator may return
-#   multiple segments as well, and all will be returned to caller
-# NOTE: returned segments might be unclean
 def replacer(segiter, filterFunc, replaceFunc):
+    """Executes `filterFunc` on each segment and replace the segment with segiter that results from calling `replaceFunc` with the input segment.
+
+Each segment in `segiter` is passed to `filterFunc` (with the segment data as
+the parameters of the call). If `filterFunc` returns `False`, segment is passed
+as-is. Otherwise `replaceFunc` is called with the segment as parameters.
+
+If `replaceFunc` returns ``core.VALUE_PASSTHROUGH``, segment is passed as-is.
+Otherwise `replaceFunc` must return an segiter with the same dimensions for each
+segment as the input segment. Number of segments in returned segiter is not
+restricted and may be zero, one, or more than one.
+
+Total duration of segments of returned segiter may be different from the input
+segment duration, but care needs to be taken with such manipulations as there
+are no enforced checks for valid durations (> 0).
+
+Args:
+    segiter (iterator): Segments to process. Each segment will be evaluated
+        separately.
+    filterFunc (callable): Function that is called once for each segment with
+        the segment given as the parameter to the function. Must return True or
+        False.
+    replaceFunc (callable): Function that will be called with each segment that
+        `filterFunc` returned `True`. Must return iterable that represents new
+        segments to use in place of the original input segment. Can return an
+        empty iterable as well resulting in input segment being discarded.
+
+Yields:
+    Yields segments that have their values replaced based on `filterFunc`
+    decisions and `replaceFunc` result values.
+
+Examples:
+
+.. include:: ../doc_examples/output/replacer.inc
+
+Note:
+    It is likely that output will be `dirty`. To make it clean, see
+    :py:func:`core.cleaner <scorpy.core.cleaner>`
+
+Warning:
+    Number of returned segments may be lower or higher than input segments in
+    the flow. No data validation is done with respect of resulting duration
+    and output may even contain invalid segments with duration of zero if
+    `replaceFunc` is evil enough.
+"""
+
     for segment in segiter:
         if not filterFunc(*segment):
             # filter didn't match, pass as is
             # print("replacer(%s): no match, pass-through" % str(segment))
             yield segment
-        else:
-            r = replaceFunc(*segment)
-            # print("replacer(%s): matched, result=%s" % (str(segment), str(r)))
-            if r is VALUE_PASSTHROUGH:
-                # replacer decided to avoid modifications, pass as is
-                # print(" replacer: replacer didn't want to replace, yielding original")
-                yield segment
-            else:
-                # replacer returned a segiter, so run that through before
-                # continuing with regular programming
-                for replacementSegment in r:
-                    # print(" replacer: yielding %s" % str(replacementSegment))
-                    yield replacementSegment
+            continue
+
+        # filter matched, call replaceFunc to determine what to do
+        r = replaceFunc(*segment)
+        # print("replacer(%s): matched, result=%s" % (str(segment), str(r)))
+        if r is VALUE_PASSTHROUGH:
+            # replacer decided to avoid modifications, pass as is
+            # print(" replacer: replacer didn't want to replace, yielding original")
+            yield segment
+            continue
+
+        # replacer returned a segiter, so run that through before continuing
+        # with regular programming
+        for replacementSegment in r:
+            # print(" replacer: yielding %s" % str(replacementSegment))
+            yield replacementSegment
 
 def tester(segiter, filterFunc, resultValues=(1, 0)):
     """Executes `filterFunc` on each segment and replace the segment value from `resultValues` based on filter result.
 
 Each segment in `segiter` is passed to `filterFunc` (with the segment data as
-the parameters of the call`). Based on `filterFunc` return value (`True` or
+the parameters of the call). Based on `filterFunc` return value (`True` or
 `False`), `resultValues` is consulted as follows:
 
 Result of filter:
