@@ -28,7 +28,7 @@ else:
 def requireVersion(major, minor=0, patch=0):
     """Abort if scorpy is older than given *major.minor.patch* (semver)."""
     checkAgainst = major, minor, patch
-    if version_info < checkAgainst:
+    if version_info < checkAgainst: # pragma: no cover
         print("ERROR: At least version %u.%u.%u of Scorpy required (%u.%u.%u found). Cannot continue" % (checkAgainst+version_info) )
         sys.exit(1)
     return True
@@ -583,7 +583,7 @@ Warning:
                 # print("p5(segEnd=%u > endAt=%u)" % (segEnd, endAt))
                 yield(endAt - segStart, segment[1])
             else:
-                assert(False)
+                assert(False) # pragma: no cover
         else:
             # print("p0(segEnd=%u <= startAt=%u) [no emit]" % (segEnd, startAt))
             pass
