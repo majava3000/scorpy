@@ -84,6 +84,9 @@ def segiterToWavedrom(segiter, name):
 
   return ret
 
+# TODO: add support for inputTrack as tuple to indicate multiple input
+#       mode (also document this function and what the expected types
+#       are since existing protocol is single inputTrack and multiple results)
 def resultAsWavedrom(inputTrack, resultTracks, label=None):
   ret = ['{signal: [']
   ret.append('  '+segiterToWavedrom(inputTrack, inputTrack.name))

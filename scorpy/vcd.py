@@ -61,7 +61,7 @@ def generateVCD(outf, *tracks):
     print("$upscope $end", file=outf)
     print("$enddefinitions $end", file=outf)
 
-    changes = scorpy.core.getCombinedChanges(*tracks)
+    changes = scorpy.core.combiner(*tracks)
     # track time as absolute
     ts = 0
     # we only emit track values when they change, to prepare to track those

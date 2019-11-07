@@ -35,7 +35,18 @@ def requireVersion(major, minor=0, patch=0):
 
 # internal combiner utility. does grunt work of getCombinedChanges, but does not
 # assume inputs are itersegs
-def segmentCombiner(*itersegs):
+#
+# utility that generates an iterable sequence of combined track values.
+# returned values are like with getSegments() generator, but each source track
+# participates in the generation, and changes are emitted whenever any source
+# track changes. results can be used for many different purposes:
+# - Creating MultiBinaryTracks
+# - Creating VCD emit compliant data
+# - Creating decision points for binary logic/calculations
+#
+# Note that combiner does not care about actual value format, any format is
+# supported as long as the underlying track supports the getSegments() interface
+def combiner(*itersegs):
 
     segIterator = [ iter(t) for t in itersegs ]
     # debug only, consumes all data
@@ -119,29 +130,19 @@ def segmentCombiner(*itersegs):
             lastEmitAt = timeAt
     # all done, generator ends
 
-# utility that generates an iterable sequence of combined track values.
-# returned values are like with getSegments() generator, but each source track
-# participates in the generation, and changes are emitted whenever any source
-# track changes. results can be used for many different purposes:
-# - Creating MultiBinaryTracks
-# - Creating VCD emit compliant data
-# - Creating decision points for binary logic/calculations
-#
-# Note that combiner does not care about actual value format, any format is
-# supported as long as the underlying track supports the getSegments() interface
-def getCombinedChanges(*tracks):
-    # NOTE: timebase harmonization is not supported, but at least check that
-    #       all tracks have the same timebase
-    assert(all(track.timebase == tracks[0].timebase for track in tracks))
-    # NOTE: check also that durations are the same for all (also should probably
-    #       implement this properly)
-    # BUG: need to relax this since for some reason deglitcher returns one
-    #      shorter track when using test-mode. Also, this is not a critical
-    #      problem, but keep it in until core reason is resolved (just comment
-    #      out for now)
-    # assert(all(track.duration == tracks[0].duration for track in tracks))
+# def getCombinedChanges(*tracks):
+#     # NOTE: timebase harmonization is not supported, but at least check that
+#     #       all tracks have the same timebase
+#     assert(all(track.timebase == tracks[0].timebase for track in tracks))
+#     # NOTE: check also that durations are the same for all (also should probably
+#     #       implement this properly)
+#     # BUG: need to relax this since for some reason deglitcher returns one
+#     #      shorter track when using test-mode. Also, this is not a critical
+#     #      problem, but keep it in until core reason is resolved (just comment
+#     #      out for now)
+#     # assert(all(track.duration == tracks[0].duration for track in tracks))
 
-    return segmentCombiner(*tracks)
+#     return combiner(*tracks)
 
 _binaryWeights = tuple([ 2**(x) for x in range(64) ])
 
@@ -430,7 +431,7 @@ Note:
 # True. Returned values might not be clean
 def setMaskValue(segiter, maskiter, newValue):
     # print("setMaskValue: starting")
-    combinedSegments = segmentCombiner(segiter, maskiter)
+    combinedSegments = combiner(segiter, maskiter)
     # print("setMaskValue: combinedSegments set up")
     # replace value when mask evals true
     selectIfMaskTrue = lambda dur, origValue, mask: mask
