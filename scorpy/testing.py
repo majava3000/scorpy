@@ -6,6 +6,8 @@
 
 import scorpy.core as core
 
+import types
+
 # convert a shorthand signal notation into segiter suitable to be used with
 # either BinaryTrack or UnsignedTrack constructor/segsegments (depending on
 # values). By default each input code corresponds to duration of 1, but can be
@@ -89,7 +91,11 @@ def segiterToWavedrom(segiter, name):
 #       are since existing protocol is single inputTrack and multiple results)
 def resultAsWavedrom(inputTrack, resultTracks, label=None):
   ret = ['{signal: [']
-  ret.append('  '+segiterToWavedrom(inputTrack, inputTrack.name))
+  if type(inputTrack) in (types.ListType, types.TupleType):
+    for i in inputTrack:
+      ret.append('  '+segiterToWavedrom(i, i.name))
+  else:
+    ret.append('  '+segiterToWavedrom(inputTrack, inputTrack.name))
   ret.append(r'  {},')
   for rt in resultTracks:
     ret.append('  '+segiterToWavedrom(rt, rt.name))
