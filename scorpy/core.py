@@ -34,7 +34,7 @@ def requireVersion(major, minor=0, patch=0):
     return True
 
 # combines/interleaves inputs into a possibly multidimensional output
-# segiter. accepts itersegs as well as tracks as inputs. Order is kept across
+# segiter. accepts segiters as well as tracks as inputs. Order is kept across
 # operation
 #
 # utility that generates an iterable sequence of combined track values.
@@ -47,9 +47,40 @@ def requireVersion(major, minor=0, patch=0):
 #
 # Note that combiner does not care about actual value format, any format is
 # supported as long as the underlying track supports the getSegments() interface
-def combiner(*itersegs):
+def combiner(*segiters):
+    """Combines/interleaves input segiters into a single segiter.
 
-    segIterator = [ iter(t) for t in itersegs ]
+With single input, results in identity operation. "Width" of resulting segiter
+will be equal to the number of input parameters.
+
+Order of values in result will be the order of input parameters.
+
+Useful when combining multiple input iterators into a single one, before doing
+processing on the combination of the input values. Also useful with
+:py:func:`core.binaryCombiner <scorpy.core.binaryCombiner>` when converting
+multiple binary tracks into a single numeric value track.
+
+Args:
+    segiters (one or more segiter): Segment iterators to combine.
+
+Yields:
+    Yields segments whose length is the minimum across the length of the
+    input segments, with the values picked across the input segments.
+
+Examples:
+
+.. include:: ../doc_examples/output/combiner.inc
+
+Note:
+    It is possible that output will be `dirty`. To make it clean, see
+    :py:func:`core.cleaner <scorpy.core.cleaner>`
+
+Note:
+    Worst case number of output segments is the sum of the counts of segments in
+    each of the inputs.
+"""
+
+    segIterator = [ iter(t) for t in segiters ]
     # debug only, consumes all data
     # for i in segIterator:
     #     print(list(i))
@@ -61,14 +92,14 @@ def combiner(*itersegs):
     segHoldUntil = [ i[0] for i in initials ]
 
     # print("initial segValue: %r" % segValue)
-    # assume all itersegs have still data (might not be true)
-    unconsumedChannelIndices = list(range(len(itersegs)))
+    # assume all segiters have still data (might not be true)
+    unconsumedChannelIndices = list(range(len(segiters)))
     # since we can't modify lists while iterating, this will hold the channel
     # indices to remove from the candidates. removal will be done at the end
     # of the main loop where this will also be pruned if it has something
     consumedChannelIndices = []
 
-    # do initial emit (all source itersegs are valid at this point, no reason
+    # do initial emit (all source segiters are valid at this point, no reason
     # to filter based on consumed/unconsumed status)
     timeAt = min(segHoldUntil)
     # time when we emitted last (for output delta). timeAt for first emit equals
@@ -86,8 +117,8 @@ def combiner(*itersegs):
         # consumed this time
         for chIdx in unconsumedChannelIndices:
             # time to update the value for track?
-            # this will be hit for all itersegs on the first iteration
-            # note that equal check is on purpose, since once itersegs run out of
+            # this will be hit for all segiters on the first iteration
+            # note that equal check is on purpose, since once segiters run out of
             # data, their holdtime will be lower than timeAt (by design)
             if timeAt == segHoldUntil[chIdx]:
                 # print("  Updated chIdx %u, match on timeAt(%u)" % (chIdx, timeAt))
@@ -117,7 +148,7 @@ def combiner(*itersegs):
             consumedChannelIndices = []
 
         # advance time to the newest minimum. however, values that are at timeAt
-        # or below must not be considered here (ie, we need to ignore itersegs
+        # or below must not be considered here (ie, we need to ignore segiters
         # that we ran out of data for). Also emit the new entries at this point
         if len(unconsumedChannelIndices) > 0:
             timeAt = min((segHoldUntil[ci] for ci in unconsumedChannelIndices))
