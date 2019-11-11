@@ -10,11 +10,11 @@
 .. wavedrom::
 
     {signal: [
-      { name: 'in1', wave: 'z=...=...=...=...z', data: ['A', 'B', 'C', 'D']},
-      { name: 'in2', wave: 'z=..=..=..=..=..=z', data: ['A', 'B', 'C', 'D', 'A', 'B']},
-      { name: 'in3', wave: 'z=.=.=.=.=.=.=.=.z', data: ['A', 'B', 'C', 'D', 'A', 'B', 'C', 'D']},
+      { name: 'in1', wave: 'z=...=...=...z', data: ['A', 'B', 'C']},
+      { name: 'in2', wave: 'z=..=..=..=..z', data: ['A', 'B', 'C', 'D']},
+      { name: 'in3', wave: 'z=.=.=.=.=.=.z', data: ['A', 'B', 'C', 'D', 'A', 'B']},
       {},
-      { name: 'r', wave: 'z=.===.=.===.=.==z', data: ['AAA', 'AAB', 'ABB', 'BBC', 'BCD', 'CCA', 'CDA', 'CDB', 'DAC', 'DAD', 'DBD']},
+      { name: 'r', wave: 'z=.===.=.===.z', data: ['AAA', 'AAB', 'ABB', 'BBC', 'BCD', 'CCA', 'CDA', 'CDB']},
       ],
       head: { tick: -1 },
     }
