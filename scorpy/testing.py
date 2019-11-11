@@ -84,6 +84,7 @@ def segiterToWavedrom(segiter, name):
   wave = []
   # data will contain only the non A-Bs
   data = []
+  isMultidim = False
   for comps in segiter:
     if len(comps) == 2:
       # single dimension segiter
@@ -98,6 +99,7 @@ def segiterToWavedrom(segiter, name):
         wave.append('.')
         dur -= 1
     else:
+      isMultidim = True
       dur, values = comps[0], comps[1:]
       # TODO: replace 0/1 data with ordinal of '0' and '1'
       # multidimensional track (assuming A, B, C here, 0 or 1 not supported)
@@ -121,7 +123,7 @@ def segiterToWavedrom(segiter, name):
 # TODO: add support for inputTrack as tuple to indicate multiple input
 #       mode (also document this function and what the expected types
 #       are since existing protocol is single inputTrack and multiple results)
-def resultAsWavedrom(inputTrack, resultTracks, label=None, useNarrow=True):
+def resultAsWavedrom(inputTrack, resultTracks, label=None, useNarrow=True, combineOutputs=False):
   ret = ['{signal: [']
   if type(inputTrack) in (types.ListType, types.TupleType):
     for i in inputTrack:
@@ -129,6 +131,8 @@ def resultAsWavedrom(inputTrack, resultTracks, label=None, useNarrow=True):
   else:
     ret.append('  '+segiterToWavedrom(inputTrack, inputTrack.name))
   ret.append(r'  {},')
+  if combineOutputs:
+    ret.append(r"  ['result',")
   for rIndex in range(len(resultTracks)):
     rt = resultTracks[rIndex]
     # default to 'r' as the output name if dealing with segiters instead
@@ -143,9 +147,11 @@ def resultAsWavedrom(inputTrack, resultTracks, label=None, useNarrow=True):
   labelText = ''
   if label is not None:
     labelText = ", text: '%s'" % label
-  configText = ''
+  configText = "  config: { skin: 'default' },\n"
   if useNarrow:
     configText = "  config: { skin: 'narrow' },\n"
+  if combineOutputs:
+    ret.append(r"  ],")
   ret.append("""  ],
   head: { tick: -1%s },
 %s}

@@ -14,7 +14,12 @@
       { name: 'in2', wave: 'z=..=..=..=..z', data: ['A', 'B', 'C', 'D']},
       { name: 'in3', wave: 'z=.=.=.=.=.=.z', data: ['A', 'B', 'C', 'D', 'A', 'B']},
       {},
-      { name: 'r', wave: 'z=.===.=.===.z', data: ['AAA', 'AAB', 'ABB', 'BBC', 'BCD', 'CCA', 'CDA', 'CDB']},
+      ['result',
+      { name: 'v[0]', wave: 'z=.===.=.===.z', data: ['A', 'A', 'A', 'B', 'B', 'C', 'C', 'C']},
+      { name: 'v[1]', wave: 'z=.===.=.===.z', data: ['A', 'A', 'B', 'B', 'C', 'C', 'D', 'D']},
+      { name: 'v[2]', wave: 'z=.===.=.===.z', data: ['A', 'B', 'B', 'C', 'D', 'A', 'A', 'B']},
+      ],
       ],
       head: { tick: -1 },
+      config: { skin: 'narrow' },
     }

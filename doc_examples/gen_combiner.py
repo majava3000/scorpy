@@ -17,8 +17,9 @@ if __name__ == '__main__':
 
     # NOTE: r is multidimensional (3) segiter, so special processing
     # required with the doIt call below (can't use narrow style either)
-    # example-start here
+    # example-start-here
     r = core.combiner(in1, in2, in3)
     # example-end-here
 
-    doIt(args, [in1, in2, in3], [r], name, useNarrow=False)
+    # splitResults for wavedrom, otherwise keep in multi-dim
+    doIt(args, [in1, in2, in3], r, name, useNarrow=True, splitResults=(args.mode != MODE_SHORTCODE))
