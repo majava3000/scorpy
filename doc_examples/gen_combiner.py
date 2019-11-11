@@ -11,9 +11,9 @@ if __name__ == '__main__':
     name = 'combiner'
     args = getArgs(name)
 
-    in1 = makeSimpleTrack('in1', shortcodeToSegiter("A...B...C...D..."))
-    in2 = makeSimpleTrack('in2', shortcodeToSegiter("A..B..C..D..A..B"))
-    in3 = makeSimpleTrack('in3', shortcodeToSegiter("A.B.C.D.A.B.C.D."))
+    in1 = makeSimpleTrack('in1', shortcodeToSegiter("A...B...C..."))
+    in2 = makeSimpleTrack('in2', shortcodeToSegiter("A..B..C..D.."))
+    in3 = makeSimpleTrack('in3', shortcodeToSegiter("A.B.C.D.A.B."))
 
     # NOTE: r is multidimensional (3) segiter, so special processing
     # required with the doIt call below (can't use narrow style either)
