@@ -24,6 +24,7 @@ import types
 #   duration, while latter encodes a single segment with extended duration.
 #
 # Returns an segiter from the data
+# TODO: Support multidimensional shortcodes
 def shortcodeToSegiter(str, durationFactor=1):
   # this will be a list of [val, count] entries (RLE with C,V convention)
   ret = []
@@ -40,21 +41,39 @@ def shortcodeToSegiter(str, durationFactor=1):
       ret.append([durationFactor, ord(c)])
   return iter(ret)
 
+# given value in shortcode, return char that represents it
+def shortcodeValueToChar(v):
+  if v in (0, 1):
+    v += ord('0')
+  v = chr(v)
+  return v
+
 # Given segiter, return shortcode string from it
 # No duration reduction is supported by this encoder
+# Multidimensional output is supported by grouping with braces
 def segiterToShortcode(segiter):
   # 0 and 1 mapped into '0' and '1'
   # rest mapped via chr
   # single segment duration encoded with repeating dots
   ret = []
-  for dur, v in segiter:
-    #print(dur, v)
-    if v in (0, 1):
-      v += ord('0')
-    v = chr(v)
-    ret.append(v)
+  for comps in segiter:
+    dur = None
+    if len(comps) == 2:
+      dur, v = comps
+      #print(dur, v)
+      # if v in (0, 1):
+      #   v += ord('0')
+      # v = chr(v)
+      ret.append(shortcodeValueToChar(v))
+    else:
+      # multidimensional shortcode
+      dur, values = comps[0], comps[1:]
+      vStr = ''.join(map(shortcodeValueToChar, values))
+      ret.append("[%s]" % vStr)
+
     for _ in range(dur-1):
       ret.append(".")
+
   return ''.join(ret)
 
 # make a single line describing the wavedrom description of the track
