@@ -28,9 +28,9 @@ if __name__ == '__main__':
     r3 = core.transitionGenerator(input_, 0, d, u, 2, 2)
     # example-end-here
 
-    r1 = makeSimpleTrack('result1', r1)
-    r2 = makeSimpleTrack('result2', r2)
-    r3 = makeSimpleTrack('result3', r3)
+    r1 = makeSimpleTrack('r1', r1)
+    r2 = makeSimpleTrack('r2', r2)
+    r3 = makeSimpleTrack('r3', r3)
 
     # do magic. supports shortcode, wavedrom and docint modes. the label is used
     # only for wavedrom output mode. tuple is necessary for the results

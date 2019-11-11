@@ -12,7 +12,7 @@
     {signal: [
       { name: 'input', wave: 'z00110.1.0.01.111100000101z'},
       {},
-      { name: 'result', wave: 'z0.1.0.1.0..1.....0....101z'},
+      { name: 'r', wave: 'z0.1.0.1.0..1.....0....101z'},
       ],
       head: { tick: -1 },
       config: { skin: 'narrow' },

@@ -23,10 +23,10 @@ if __name__ == '__main__':
     r4 = core.deglitcher(input_, 4)
     # example-end-here
 
-    r1 = makeSimpleTrack('result1', r1)
-    r2 = makeSimpleTrack('result2', r2)
-    r3 = makeSimpleTrack('result3', r3)
-    r4 = makeSimpleTrack('result4', r4)
+    r1 = makeSimpleTrack('r1', r1)
+    r2 = makeSimpleTrack('r2', r2)
+    r3 = makeSimpleTrack('r3', r3)
+    r4 = makeSimpleTrack('r4', r4)
 
     # do magic. supports shortcode, wavedrom and docint modes. the label is used
     # only for wavedrom output mode. tuple is necessary for the results

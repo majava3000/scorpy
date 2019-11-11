@@ -12,9 +12,9 @@
     {signal: [
       { name: 'input', wave: 'z0.=0=0.=0..=0...=0....z', data: ['R', 'R', 'R', 'R', 'R']},
       {},
-      { name: 'result1', wave: 'z===0=====0===0.===0..=z', data: ['d', 'u', 'R', 'R', 'd', 'u', 'R', 'd', 'u', 'R', 'd', 'u', 'R', 'd', 'u']},
-      { name: 'result2', wave: 'z===0======.==0=.==0.=.z', data: ['d', 'u', 'R', 'R', 'd', 'u', 'R', 'd', 'u', 'R', 'd', 'u', 'R', 'd', 'u']},
-      { name: 'result3', wave: 'z===0======.==.=.==.0=.z', data: ['d', 'u', 'R', 'R', 'd', 'u', 'R', 'd', 'u', 'R', 'd', 'u', 'R', 'd', 'u']},
+      { name: 'r1', wave: 'z===0=====0===0.===0..=z', data: ['d', 'u', 'R', 'R', 'd', 'u', 'R', 'd', 'u', 'R', 'd', 'u', 'R', 'd', 'u']},
+      { name: 'r2', wave: 'z===0======.==0=.==0.=.z', data: ['d', 'u', 'R', 'R', 'd', 'u', 'R', 'd', 'u', 'R', 'd', 'u', 'R', 'd', 'u']},
+      { name: 'r3', wave: 'z===0======.==.=.==.0=.z', data: ['d', 'u', 'R', 'R', 'd', 'u', 'R', 'd', 'u', 'R', 'd', 'u', 'R', 'd', 'u']},
       ],
       head: { tick: -1 },
       config: { skin: 'narrow' },

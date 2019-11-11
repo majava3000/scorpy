@@ -17,6 +17,6 @@ if __name__ == '__main__':
     r = core.cleaner(input_)
     # example-end-here
 
-    r = makeSimpleTrack('result', r)
+    r = makeSimpleTrack('r', r)
 
     doIt(args, input_, [r], name)
