@@ -33,8 +33,9 @@ def requireVersion(major, minor=0, patch=0):
         sys.exit(1)
     return True
 
-# internal combiner utility. does grunt work of getCombinedChanges, but does not
-# assume inputs are itersegs
+# combines/interleaves inputs into a possibly multidimensional output
+# segiter. accepts itersegs as well as tracks as inputs. Order is kept across
+# operation
 #
 # utility that generates an iterable sequence of combined track values.
 # returned values are like with getSegments() generator, but each source track
@@ -129,20 +130,6 @@ def combiner(*itersegs):
             yield tuple([timeAt - lastEmitAt] + segValue)
             lastEmitAt = timeAt
     # all done, generator ends
-
-# def getCombinedChanges(*tracks):
-#     # NOTE: timebase harmonization is not supported, but at least check that
-#     #       all tracks have the same timebase
-#     assert(all(track.timebase == tracks[0].timebase for track in tracks))
-#     # NOTE: check also that durations are the same for all (also should probably
-#     #       implement this properly)
-#     # BUG: need to relax this since for some reason deglitcher returns one
-#     #      shorter track when using test-mode. Also, this is not a critical
-#     #      problem, but keep it in until core reason is resolved (just comment
-#     #      out for now)
-#     # assert(all(track.duration == tracks[0].duration for track in tracks))
-
-#     return combiner(*tracks)
 
 _binaryWeights = tuple([ 2**(x) for x in range(64) ])
 
