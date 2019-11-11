@@ -65,16 +65,29 @@ def segiterToWavedrom(segiter, name):
   wave = []
   # data will contain only the non A-Bs
   data = []
-  for dur, v in segiter:
-    if v < 2:
-      # emit 0 or 1, no data
-      wave.append(chr(ord('0') + v))
+  for comps in segiter:
+    if len(comps) == 2:
+      # single dimension segiter
+      dur, v = comps
+      if v < 2:
+        # emit 0 or 1, no data
+        wave.append(chr(ord('0') + v))
+      else:
+        wave.append('=')
+        data.append(chr(v))
+      while dur > 1:
+        wave.append('.')
+        dur -= 1
     else:
+      dur, values = comps[0], comps[1:]
+      # TODO: replace 0/1 data with ordinal of '0' and '1'
+      # multidimensional track (assuming A, B, C here, 0 or 1 not supported)
+      vStr = ''.join(map(chr, comps[1:]))
       wave.append('=')
-      data.append(chr(v))
-    while dur > 1:
-      wave.append('.')
-      dur -= 1
+      data.append(vStr)
+      while dur > 1:
+        wave.append('.')
+        dur -= 1
   wave = ''.join(wave)
   data = "', '".join(data)
 
@@ -89,7 +102,7 @@ def segiterToWavedrom(segiter, name):
 # TODO: add support for inputTrack as tuple to indicate multiple input
 #       mode (also document this function and what the expected types
 #       are since existing protocol is single inputTrack and multiple results)
-def resultAsWavedrom(inputTrack, resultTracks, label=None):
+def resultAsWavedrom(inputTrack, resultTracks, label=None, useNarrow=True):
   ret = ['{signal: [']
   if type(inputTrack) in (types.ListType, types.TupleType):
     for i in inputTrack:
@@ -97,16 +110,27 @@ def resultAsWavedrom(inputTrack, resultTracks, label=None):
   else:
     ret.append('  '+segiterToWavedrom(inputTrack, inputTrack.name))
   ret.append(r'  {},')
-  for rt in resultTracks:
-    ret.append('  '+segiterToWavedrom(rt, rt.name))
+  for rIndex in range(len(resultTracks)):
+    rt = resultTracks[rIndex]
+    # default to 'r' as the output name if dealing with segiters instead
+    # of tracks
+    n = "r"
+    # if multiple outputs, use r0.. format instead
+    if len(resultTracks) > 1:
+      n = "r%u" % rIndex
+    if hasattr(rt, 'name'):
+      n = rt.name
+    ret.append('  '+segiterToWavedrom(rt, n))
   labelText = ''
   if label is not None:
     labelText = ", text: '%s'" % label
+  configText = ''
+  if useNarrow:
+    configText = "  config: { skin: 'narrow' },\n"
   ret.append("""  ],
   head: { tick: -1%s },
-  config: { skin: 'narrow' },
-}
-""" % labelText)
+%s}
+""" % (labelText, configText))
   return '\n'.join(ret)
 
 def makeSimpleTrack(label, segiter):

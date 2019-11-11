@@ -15,8 +15,12 @@ from scorpy.testing import *
 def printAsShortcodes(tracks, outf=sys.stdout):
     labels = []
     shortcodes = []
-    for t in tracks:
-        labels.append(t.name)
+    for tIndex in range(len(tracks)):
+        t = tracks[tIndex]
+        n = 't%u' % tIndex
+        if hasattr(t, 'name'):
+          n = t.name
+        labels.append(n)
         shortcodes.append(segiterToShortcode(iter(t)))
     maxWidth = max(map(len, labels))
     for idx in range(len(labels)):
@@ -57,10 +61,10 @@ def getArgs(name):
     return args
 
 # args, input_, [r1, r2, r3, r4], 'tester'
-def doIt(args, input_, results, label):
+def doIt(args, input_, results, label, useNarrow=True):
 
     if args.mode == MODE_WAVEDROM:
-        print(resultAsWavedrom(input_, results, label), file=args.outfile)
+        print(resultAsWavedrom(input_, results, label, useNarrow), file=args.outfile)
     elif args.mode == MODE_SHORTCODE:
         printAsShortcodes([input_]+results, outf=args.outfile)
     else:
@@ -75,7 +79,7 @@ def doIt(args, input_, results, label):
 """.format(args.progname, args.progname), file=args.outfile)
 
         # wavedrom needs to be indented, otherwise not recognized properly
-        wavedrom = resultAsWavedrom(input_, results)
+        wavedrom = resultAsWavedrom(input_, results, None, useNarrow)
         wavedrom = '\n'.join([ "    "+line for line in wavedrom.splitlines()])
         print(""".. wavedrom::
 
