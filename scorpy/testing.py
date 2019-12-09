@@ -43,7 +43,7 @@ def shortcodeToSegiter(str, durationFactor=1):
 
 # given value in shortcode, return char that represents it
 def shortcodeValueToChar(v):
-  if v in (0, 1):
+  if v in range(10):
     v += ord('0')
   v = chr(v)
   return v
@@ -78,7 +78,9 @@ def segiterToShortcode(segiter):
 
 # make a single line describing the wavedrom description of the track
 # 0-1 are converted to 0 and 1, emitted as data literals
-def segiterToWavedrom(segiter, name):
+# if zeroAndOneAreSpecial is set, then they're not emitted via data
+# format mechanism, otherwise numbers go via char conversion
+def segiterToWavedrom(segiter, name, zeroAndOneAreSpecial=True):
   # we'll collect the wave and data part separately
   # wave will not contain the z prefix nor suffix at this point
   wave = []
@@ -89,9 +91,13 @@ def segiterToWavedrom(segiter, name):
     if len(comps) == 2:
       # single dimension segiter
       dur, v = comps
-      if v < 2:
+      if v < 2 and zeroAndOneAreSpecial:
         # emit 0 or 1, no data
         wave.append(chr(ord('0') + v))
+      elif v < 10:
+        # numeric value
+        wave.append('=')
+        data.append(chr(ord('0') + v))
       else:
         wave.append('=')
         data.append(chr(v))
@@ -123,13 +129,15 @@ def segiterToWavedrom(segiter, name):
 # TODO: add support for inputTrack as tuple to indicate multiple input
 #       mode (also document this function and what the expected types
 #       are since existing protocol is single inputTrack and multiple results)
-def resultAsWavedrom(inputTrack, resultTracks, label=None, useNarrow=True, combineOutputs=False):
+def resultAsWavedrom(inputTrack, resultTracks, label=None, useNarrow=True, combineOutputs=False, zeroAndOneAreSpecial=3):
   ret = ['{signal: [']
+  inputZeroAndOneAreSpecial = zeroAndOneAreSpecial & 1 > 0
+  resultZeroAndOneAreSpecial = zeroAndOneAreSpecial & 2 > 0
   if type(inputTrack) in (types.ListType, types.TupleType):
     for i in inputTrack:
-      ret.append('  '+segiterToWavedrom(i, i.name))
+      ret.append('  '+segiterToWavedrom(i, i.name, inputZeroAndOneAreSpecial))
   else:
-    ret.append('  '+segiterToWavedrom(inputTrack, inputTrack.name))
+    ret.append('  '+segiterToWavedrom(inputTrack, inputTrack.name, inputZeroAndOneAreSpecial))
   ret.append(r'  {},')
   if combineOutputs:
     ret.append(r"  ['result',")
@@ -143,7 +151,7 @@ def resultAsWavedrom(inputTrack, resultTracks, label=None, useNarrow=True, combi
       n = "r%u" % rIndex
     if hasattr(rt, 'name'):
       n = rt.name
-    ret.append('  '+segiterToWavedrom(rt, n))
+    ret.append('  '+segiterToWavedrom(rt, n, resultZeroAndOneAreSpecial))
   labelText = ''
   if label is not None:
     labelText = ", text: '%s'" % label
