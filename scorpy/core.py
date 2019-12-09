@@ -57,7 +57,7 @@ Order of values in result will be the order of input parameters.
 
 Useful when combining multiple input iterators into a single one, before doing
 processing on the combination of the input values. Also useful with
-:py:func:`core.binaryCombiner <scorpy.core.binaryCombiner>` when converting
+:py:func:`core.binaryDecoder <scorpy.core.binaryDecoder>` when converting
 multiple binary tracks into a single numeric value track.
 
 Args:
@@ -67,7 +67,7 @@ Yields:
     Yields segments whose length is the minimum across the length of the
     input segments, with the values picked across the input segments.
 
-Examples:
+Example:
 
 .. include:: ../doc_examples/output/combiner.inc
 
@@ -167,10 +167,34 @@ _binaryWeights = tuple([ 2**(x) for x in range(64) ])
 # given a value combiner, return a binary value
 # data will be additive with multipliers based on binary series
 # delta is unchanged. this is probably horrifically inefficient
-def binaryCombiner(comb):
+def binaryDecoder(segiter):
+    """Decode input digital N-wide segiter into a binary output segiter.
+
+Binary weights are v[0] as the most significant and v[-1] as least significant
+bits.
+
+Useful with :py:func:`core.combiner <scorpy.core.combiner>` when converting
+multiple binary tracks into a single numeric value track.
+
+Args:
+    segiter (N-wide segiter): N-wide segiter which to treat as binary input
+
+Yields:
+    Yields an 1-wide segiter with binary values decoded based on the input.
+
+Example:
+
+.. include:: ../doc_examples/output/binaryDecoder.inc
+
+Note:
+    Output is `dirty` only if input is. Number of segments in output equals
+    number of segments in input.
+"""
+
+
     weights = None
     chIndices = None
-    for c in comb:
+    for c in segiter:
         delta = c[0]
         if weights is None:
             vCount = len(c)-1
@@ -418,7 +442,7 @@ Yields:
     Yields segments that are `clean` (the same value does not repeat across two
     consecutive segments).
 
-Examples:
+Example:
 
 .. include:: ../doc_examples/output/cleaner.inc
 
