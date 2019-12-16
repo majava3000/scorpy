@@ -690,6 +690,12 @@ Note:
 
 Note:
     May result in unclean result with factors smaller than 1.0
+
+Warning:
+    Due to the implementation (floating point), the actual decision point where
+    accumulated time is transferred forward is not exactly logical. This is a
+    bug but a proper implementation will end up fixing this (seen in example for
+    `r5`).
 """
 
     # handle special case of non-float
