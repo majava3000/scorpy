@@ -111,7 +111,7 @@ class Track:
             # attempt integer conversion if possible
             f = int(f)
 
-        self.setSegments(scorpy.core.scaleDuration(self.getSegments(), f))
+        self.setSegments(scorpy.core.durationScaler(self.getSegments(), f))
         self.timebase = newTimebase
 
 #

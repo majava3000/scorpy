@@ -664,19 +664,46 @@ Warning:
 # if integer factor given, no loss of data happens (including with unit)
 # note that 0 as input is accepted as are negative values (unsure why you'd want
 # that, but it's possible)
-def scaleDuration(segiter, f):
+def durationScaler(segiter, factor):
+    """Scale the duration of the segments with given factor.
+
+Using integer scaling value will preserve segment count and values.
+
+Using floating point scaling values will possibly cause loss of data (if new
+segment duration is lower than minimum duration of one). Such trimmer/dropped
+duration is moved towards the next segment duration.
+
+Args:
+    segiter (iterator): Segments whose duration will be multiplied by factor.
+    factor (float | integer): Factor by which to multiply the individual segment
+        durations.
+
+Yields:
+    Yields segments whose duration has been multiplied by given factor.
+
+Examples:
+
+.. include:: ../doc_examples/output/durationscaler.inc
+
+Note:
+    For factors smaller than 1.0, may reduce number of segments in flow.
+
+Note:
+    May result in unclean result with factors smaller than 1.0
+"""
+
     # handle special case of non-float
-    if isinstance(f, _integerTypes):
+    if isinstance(factor, _integerTypes):
         for delta, v in segiter:
-            yield(delta * f, v)
+            yield(delta * factor, v)
         return
 
-    # f is not integer, need to do this a bit more carefully
+    # factor is not integer, need to do this a bit more carefully
     # this will contain the accrued time due to sub-one duration segments (we'll
     # add it to the next segment duration)
     accumulator = 0.0
     for delta, v in segiter:
-        newDelta = delta * f + accumulator
+        newDelta = delta * factor + accumulator
         # truncate to integer
         intDelta = int(newDelta)
         if intDelta == 0:
