@@ -471,14 +471,44 @@ Note:
 
 # replace input data with given value when given maskiter evalutes to boolean
 # True. Returned values might not be clean
-def setMaskValue(segiter, maskiter, newValue):
-    # print("setMaskValue: starting")
-    combinedSegments = combiner(segiter, maskiter)
-    # print("setMaskValue: combinedSegments set up")
+def masker(segiterData, segiterMask, newValue):
+    """Replace input data with given value when given masking segiter evaluates to True.
+
+Masking is often used to select interesting data based on other time-domain
+information, or to get rid of data that is of no interest (replacing the values
+with harmless zero-effect value).
+
+By using all zero mask, but with varying segment lengths, can be used to cause
+segment slicing.
+
+Args:
+    segiterData (iterator): Segments whose values will be replaced with newValue
+        if segiterMask evaluates to True.
+    segiterMask (iterator): Segments to evaluate in a boolean context and if
+        True, will replace the value in `segiterData` with given `newValue`
+    newValue: value to replace original value of segiterData with when mask
+        evaluates True
+
+Yields:
+    Yields segments of `segiterData` with values replaced with `newValue` at
+    segments where mask evaluates to True.
+
+Example:
+
+.. include:: ../doc_examples/output/masker.inc
+
+Note:
+    It is likely that output will be `dirty`. To make it clean, see
+    :py:func:`core.cleaner <scorpy.core.cleaner>`
+
+Note:
+    Number of segments is likely to increase unless masking segment boundaries
+    fall directly on input data segment boundaries.
+"""
+
+    combinedSegments = combiner(segiterData, segiterMask)
     # replace value when mask evals true
     selectIfMaskTrue = lambda dur, origValue, mask: mask
-    # # fail all filtering
-    # selectIfMaskTrue = lambda dur, origValue, mask: False
     # segments to produce should be same duration, but with value replaced
     # note that we'll propagate the mask back into the result, since we can
     # drop that out later and it's important to retain the dimensionality
@@ -487,15 +517,10 @@ def setMaskValue(segiter, maskiter, newValue):
     replacerFunc = lambda dur, origValue, mask: ( (dur, newValue, mask), )
     # result of this will be segments with old|newValue and mask (unclean)
     replaced = replacer(combinedSegments, selectIfMaskTrue, replacerFunc)
-    # print("setMaskValue: lambdas and replaced set up")
     # at this point, we'll want to drop the mask entry, since it was added by
     # us and we don't want to communicate that back. use a generator expression
-    # for this
-    # slicer = lambda x: (x[0], x[1])
-    # origDimensioned = ( slicer(seg) for seg in replaced)
-    origDimensioned = ( seg[:-1] for seg in replaced)
-    # origDimensioned = ( slicer(seg) for seg in replaced)
-    # origDimensioned = replaced
+    # for this, so that caller may use as segiter
+    origDimensioned = (seg[:-1] for seg in replaced)
     return origDimensioned
 
 # Returns events based on value match
